@@ -109,5 +109,23 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpaceEye.Common\SpaceEye.Common.csproj">
+      <Project>{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}</Project>
+      <Name>SpaceEye.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Core\SpaceEye.Core.csproj">
+      <Project>{EBBFC81D-D580-4674-99CF-6777F8312184}</Project>
+      <Name>SpaceEye.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Renderer\SpaceEye.Renderer.csproj">
+      <Project>{1697FAD1-3B33-4694-9F14-F74017A3B194}</Project>
+      <Name>SpaceEye.Renderer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Scene\SpaceEye.Scene.csproj">
+      <Project>{5449C486-D5A4-402D-B578-953DB5B6BC49}</Project>
+      <Name>SpaceEye.Scene</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

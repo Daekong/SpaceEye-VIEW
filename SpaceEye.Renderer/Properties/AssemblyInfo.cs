@@ -40,6 +40,8 @@ using System.Windows;
                                       // 리소스가 없는 경우에 사용됨)
 )]
 
+// 어셈블리간 접근 허용
+[assembly: InternalsVisibleTo("SpaceEye_Viewer")]
 
 // 어셈블리의 버전 정보는 다음 네 가지 값으로 구성됩니다.
 //

@@ -123,23 +123,22 @@ namespace SpaceEye.Scene
         /// <returns>생성된 셰이더 프로그램의 정수 ID입니다.</returns>
         private int CreateDoublePrecisionShader()
         {
-            // Vertex Shader: dvec3 입력을 받아 dmat4 행렬들과 64비트로 곱셈 연산 수행
-            string vSrc = @"#version 400 core
-                            layout(location = 0) in dvec3 aPos;
-                            uniform dmat4 model;
-                            uniform dmat4 view;
-                            uniform dmat4 projection;
-                            void main() {
-                                dvec4 clipPos = projection * view * model * dvec4(aPos, 1.0);
-                                gl_Position = vec4(clipPos); // 마지막 출력만 float 변환
-                            }";
+            // 중요: #version 앞에 공백이 단 한 칸도 있으면 안 됩니다.
+            string vSrc = "#version 410 core\n" +
+                          "layout(location = 0) in dvec3 aPos;\n" +
+                          "uniform dmat4 model;\n" +
+                          "uniform dmat4 view;\n" +
+                          "uniform dmat4 projection;\n" +
+                          "void main() {\n" +
+                          "    dvec4 clipPos = projection * view * model * dvec4(aPos, 1.0);\n" +
+                          "    gl_Position = vec4(clipPos);\n" +
+                          "}\n";
 
-            // Fragment Shader: 픽셀 색상 출력은 표준 32비트(vec4) 사용
-            string fSrc = @"#version 400 core
-                            out vec4 FragColor;
-                            void main() {
-                                FragColor = vec4(0.2, 0.5, 0.8, 1.0); // 임시 하늘색
-                            }";
+            string fSrc = "#version 410 core\n" +
+                          "out vec4 FragColor;\n" +
+                          "void main() {\n" +
+                          "    FragColor = vec4(0.2, 0.5, 0.8, 1.0);\n" +
+                          "}\n";
 
             int vs = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vs, vSrc);
