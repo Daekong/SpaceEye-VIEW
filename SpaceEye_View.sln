@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34024.191
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceEye_Viewer", "SpaceEye_Viewer\SpaceEye_Viewer.csproj", "{4831DE7D-B2D6-480E-8A19-106C15C79882}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceEye.Core", "SpaceEye.Core\SpaceEye.Core.csproj", "{EBBFC81D-D580-4674-99CF-6777F8312184}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceEye.Renderer", "SpaceEye.Renderer\SpaceEye.Renderer.csproj", "{1697FAD1-3B33-4694-9F14-F74017A3B194}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceEye.Resources", "SpaceEye.Resources\SpaceEye.Resources.csproj", "{FDF09116-9E5D-4EBB-8194-97921AB9001A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceEye.Common", "SpaceEye.Common\SpaceEye.Common.csproj", "{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceEye.Scene", "SpaceEye.Scene\SpaceEye.Scene.csproj", "{5449C486-D5A4-402D-B578-953DB5B6BC49}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4831DE7D-B2D6-480E-8A19-106C15C79882}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4831DE7D-B2D6-480E-8A19-106C15C79882}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4831DE7D-B2D6-480E-8A19-106C15C79882}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4831DE7D-B2D6-480E-8A19-106C15C79882}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBBFC81D-D580-4674-99CF-6777F8312184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBBFC81D-D580-4674-99CF-6777F8312184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBBFC81D-D580-4674-99CF-6777F8312184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBBFC81D-D580-4674-99CF-6777F8312184}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1697FAD1-3B33-4694-9F14-F74017A3B194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1697FAD1-3B33-4694-9F14-F74017A3B194}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1697FAD1-3B33-4694-9F14-F74017A3B194}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1697FAD1-3B33-4694-9F14-F74017A3B194}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDF09116-9E5D-4EBB-8194-97921AB9001A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDF09116-9E5D-4EBB-8194-97921AB9001A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDF09116-9E5D-4EBB-8194-97921AB9001A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDF09116-9E5D-4EBB-8194-97921AB9001A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5449C486-D5A4-402D-B578-953DB5B6BC49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5449C486-D5A4-402D-B578-953DB5B6BC49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5449C486-D5A4-402D-B578-953DB5B6BC49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5449C486-D5A4-402D-B578-953DB5B6BC49}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6D0BE6A-2015-4C6C-88E5-73AD7A98778B}
+	EndGlobalSection
+EndGlobal
