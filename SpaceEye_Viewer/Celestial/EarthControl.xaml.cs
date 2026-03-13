@@ -10,6 +10,7 @@ using SpaceEye.Common.CelestialDefinition;
 using SpaceEye.Common.Scene;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Scene.Common;
+using SpaceEye.Scene.Celestial;
 
 namespace SpaceEye_Viewer.Celestial
 {
@@ -165,7 +166,6 @@ namespace SpaceEye_Viewer.Celestial
                                   System.Windows.Threading.DispatcherPriority.Input);
         }
 
-
         /// <summary>
         /// 각 뷰포트(컨트롤)의 초기 카메라 위치를 설정합니다.
         /// </summary>
@@ -180,7 +180,9 @@ namespace SpaceEye_Viewer.Celestial
             cam.Up = OpenTK.Vector3d.UnitY;
         }
 
-
+        /// <summary>
+        /// Control의 초기 Scene을 구성합니다.
+        /// </summary>
         private void InitializeSceneNodes()
         {
             if (_isUniverseInitialized) return;           
@@ -192,7 +194,7 @@ namespace SpaceEye_Viewer.Celestial
                 {
                     // 노드 직접 생성 및 추가
                     UniverseScene.Instance.AddNode(new SkyboxNode());                   
-                    UniverseScene.Instance.AddNode(new EarthNode());
+                    UniverseScene.Instance.AddNode(new EarthNodeTES());
                     SetupInitialCameras();
                     _isUniverseInitialized = true;                    
                 });

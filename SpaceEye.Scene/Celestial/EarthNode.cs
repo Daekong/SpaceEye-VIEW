@@ -58,7 +58,7 @@ namespace SpaceEye.Scene
         {
             if (_isInitialized) return;
 
-            // 1. 64비트 구체 데이터 생성 (지구 반지름: 6371.0 km)
+            // 1. 64비트 구체 데이터 생성
             var (vertices, indices) = SphereGenerator.GenerateSphere(Earth.EarthRadius, 32);
             _indexCount = indices.Length;
 
