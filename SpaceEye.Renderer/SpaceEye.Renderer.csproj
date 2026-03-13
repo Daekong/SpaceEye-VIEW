@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GLWpfControl, Version=3.3.1.0, Culture=neutral, PublicKeyToken=74c0984c7a6cb2b2, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.GLWpfControl.3.3.1\lib\net452\GLWpfControl.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK, Version=3.3.3.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.3.3\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -61,14 +67,32 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="SceneRenderer.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SpaceEye.Common\SpaceEye.Common.csproj">
+      <Project>{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}</Project>
+      <Name>SpaceEye.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Core\SpaceEye.Core.csproj">
+      <Project>{EBBFC81D-D580-4674-99CF-6777F8312184}</Project>
+      <Name>SpaceEye.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Scene\SpaceEye.Scene.csproj">
+      <Project>{5449C486-D5A4-402D-B578-953DB5B6BC49}</Project>
+      <Name>SpaceEye.Scene</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
