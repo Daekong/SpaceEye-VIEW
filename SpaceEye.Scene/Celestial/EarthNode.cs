@@ -1,6 +1,9 @@
 ﻿using System;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SpaceEye.Common.CelestialDefinition;
+using SpaceEye.Common.Extensions;
+using SpaceEye.Common.Interfaces;
 using SpaceEye.Core;
 using SpaceEye.Core.Celestial;
 using SpaceEye.Scene.Interfaces;
@@ -14,8 +17,10 @@ namespace SpaceEye.Scene
     /// 이 클래스는 Km 단위의 거대 스케일 우주 환경에서 발생하는 정밀도 손실(Jittering) 현상을 방지하기 위해 
     /// 정점 데이터 생성부터 셰이더 연산까지 모든 과정을 <see cref="Double"/> 정밀도로 처리합니다.  
     /// </remarks>
-    internal class EarthNode : ISceneNode, IDisposable
+    internal class EarthNode : ISceneNode, ITimeUpdateable, IDisposable
     {
+        #region # Fields
+
         /// <summary>정점 배열 객체(VAO) ID입니다.</summary>
         private int _vao;
         /// <summary>정점 버퍼 객체(VBO) ID입니다.</summary>
@@ -28,12 +33,17 @@ namespace SpaceEye.Scene
         private int _indexCount;
         /// <summary>리소스 초기화 완료 여부를 나타내는 플래그입니다.</summary>
         private bool _isInitialized = false;
+        /// <summary>현재 지구의 자전 각도 (Degrees)입니다.</summary>
+        private double _rotationAngleDeg = 0;
+        #endregion
+
+        #region # Constructor & Initialize
 
         /// <summary>
         /// <see cref="EarthNode"/> 클래스의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <remarks>접근 제한자가 internal로 설정되어 엔진 외부에서의 직접 생성을 차단합니다.</remarks>
-        public  EarthNode()
+        public EarthNode()
         {
         }
 
@@ -49,7 +59,7 @@ namespace SpaceEye.Scene
             if (_isInitialized) return;
 
             // 1. 64비트 구체 데이터 생성 (지구 반지름: 6371.0 km)
-            var (vertices, indices) = SphereGenerator.GenerateSphere(6371.0, 64);
+            var (vertices, indices) = SphereGenerator.GenerateSphere(Earth.EarthRadius, 32);
             _indexCount = indices.Length;
 
             // 2. FP64 연산을 지원하는 고정밀 셰이더 프로그램 생성
@@ -80,6 +90,29 @@ namespace SpaceEye.Scene
             _isInitialized = true;
         }
 
+        #endregion
+
+        #region # ITimeUpdateable
+
+        /// <summary>
+        /// 매 프레임마다 지구의 자전 각도를 갱신합니다.
+        /// </summary>
+        public void Update(double deltaSeconds)
+        {
+            // 시뮬레이션 속도 배율 (예: 1.0은 실시간, 3600.0은 1시간을 1초에 진행)
+            double timeScale = 1000.0;
+
+            // Degree 기반 각도 계산
+            _rotationAngleDeg -= Earth.EarthRotationSpeedDegPerSec * deltaSeconds * timeScale;
+
+            // 360도 도달 시 다시 0도로 순환 (부동 소수점 정밀도 유지)
+            _rotationAngleDeg %= 360.0;
+        }
+
+        #endregion
+
+        #region # Public Method
+
         /// <summary>
         /// 주입받은 64비트 시점 행렬을 사용하여 지구를 화면에 렌더링합니다.
         /// </summary>
@@ -92,11 +125,12 @@ namespace SpaceEye.Scene
         {
             if (!_isInitialized) return;
 
-            GL.UseProgram(_shader);
-            GL.Enable(EnableCap.DepthTest); // 깊이 테스트 활성화 (지구의 앞/뒷면 구분)
+            // 1. Degree를 Radian으로 변환하여 회전 행렬 생성
+            // OpenTK의 MathHelper.DegreesToRadians를 사용하거나 (angle * PI / 180.0)을 수행합니다.           
+            Matrix4d model = Matrix4d.CreateRotationY(_rotationAngleDeg.ToRadian());
 
-            // 지구는 세계 좌표계의 원점(0, 0, 0)에 위치함을 가정하는 64비트 단위 행렬
-            Matrix4d model = Matrix4d.Identity;
+            GL.UseProgram(_shader);
+            GL.Enable(EnableCap.DepthTest); // 깊이 테스트 활성화 (지구의 앞/뒷면 구분)           
 
             // 유니폼 위치 검색 및 Matrix4d 데이터 전송
             int mLoc = GL.GetUniformLocation(_shader, "model");
@@ -176,6 +210,10 @@ namespace SpaceEye.Scene
             }
         }
 
+        #endregion
+
+        #region # IDisposable
+
         /// <summary>
         /// 할당된 모든 OpenGL 자원(VBO, VAO, Shader 등)을 메모리에서 해제합니다.
         /// </summary>
@@ -190,5 +228,7 @@ namespace SpaceEye.Scene
                 _isInitialized = false;
             }
         }
+
+        #endregion
     }
 }

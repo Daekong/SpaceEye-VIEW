@@ -6,6 +6,9 @@ using OpenTK.Wpf;
 using OpenTK.Graphics;
 using SpaceEye.Scene;
 using SpaceEye.Renderer;
+using SpaceEye.Common.CelestialDefinition;
+using SpaceEye.Common.Scene;
+using SpaceEye.Common.Interfaces;
 
 namespace SpaceEye_Viewer.Celestial
 {
@@ -16,13 +19,15 @@ namespace SpaceEye_Viewer.Celestial
     {
         #region # Fields
 
+        private bool _isUniverseInitialized = false;
+
         /// <summary>
         /// 모든 <see cref="EarthControl"/> 인스턴스가 공유하여 렌더링할 통합 우주 씬입니다.
         /// </summary>
         /// <remarks>
         /// 프로그램 시작 시 <see cref="UniverseScene"/> 객체를 생성하여 이 프로퍼티에 할당해야 합니다.
         /// </remarks>
-        internal static UniverseScene SharedUniverse { get; set; }
+        private UniverseScene SharedUniverse { get; set; } = UniverseScene.Instance;
 
         /// <summary>
         /// 이 컨트롤만의 독립적인 64비트 렌더러입니다. 카메라 정보를 포함하고 있습니다.
@@ -33,6 +38,11 @@ namespace SpaceEye_Viewer.Celestial
         /// 현재 컨트롤의 시점을 제어하는 렌더러에 접근하기 위한 프로퍼티입니다.
         /// </summary>
         internal SceneRenderer Renderer => _renderer;
+
+        /// <summary>
+        /// 마지막 업데이트 된 시각
+        /// </summary>
+        private DateTime _lastTime = DateTime.Now;
 
         #endregion
 
@@ -92,13 +102,15 @@ namespace SpaceEye_Viewer.Celestial
                     // 만약 그래도 안 된다면, 강제로 무효화하여 다시 그리게 만듭니다.
                     GlControl.InvalidateVisual();
 
+                    InitializeSceneNodes();
+
                     System.Diagnostics.Debug.WriteLine("OpenTK Start() has been called.");
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error: {ex.Message}");
                 }
-            }), System.Windows.Threading.DispatcherPriority.Background);
+            }), System.Windows.Threading.DispatcherPriority.Background);          
         }
 
         #endregion
@@ -113,16 +125,81 @@ namespace SpaceEye_Viewer.Celestial
         {
             if (SharedUniverse == null) return;
 
-            // 1. 렌더링 수행
-            _renderer.Render(SharedUniverse, ActualWidth, ActualHeight);
+            // --- DPI 보정 로직 시작 ---
+            var source = PresentationSource.FromVisual(this);
+            double dpiX = 1.0, dpiY = 1.0;
+            if (source != null && source.CompositionTarget != null)
+            {
+                dpiX = source.CompositionTarget.TransformToDevice.M11;
+                dpiY = source.CompositionTarget.TransformToDevice.M22;
+            }
 
-            // 2. [수정] 무조건적인 Invoke 대신, 렌더링 우선순위를 최하위로 낮추거나 
-            // CompositionTarget.Rendering 이벤트를 활용하는 것이 정석입니다.
-            // 일단 가장 간단한 해결책은 Priority를 최하위로 낮추는 것입니다.
-            Dispatcher.BeginInvoke(new Action(() => {
-                // 이 코드가 UI 스레드에 너무 자주 쌓이지 않도록 방지
-                GlControl.InvalidateVisual();
-            }), System.Windows.Threading.DispatcherPriority.Background);
+            // 실제 픽셀 크기 (ActualWidth * DPI 배율)
+            double pWidth = ActualWidth * dpiX;
+            double pHeight = ActualHeight * dpiY;
+
+            // ---------------------------------------------------------
+
+            if (pWidth <= 0 || pHeight <= 0) return;
+
+            // 1. [핵심] 물리 업데이트 (Update 단계)
+            // 렌더링 직전에 현재 시간과 이전 프레임 시간의 차이를 계산해 넘겨줍니다.
+            DateTime currentTime = DateTime.Now;
+            double deltaSeconds = (currentTime - _lastTime).TotalSeconds;
+            _lastTime = currentTime;
+
+            // UniverseScene 싱글톤을 통해 ITimeUpdateable 노드들의 Update(deltaSeconds) 일괄 호출
+            UniverseScene.Instance.UpdateAll(deltaSeconds);
+
+            // ---------------------------------------------------------
+
+            // 2. [핵심] 렌더링 (Draw 단계)
+            // 업데이트된 데이터를 기반으로 화면을 그립니다.
+            if (pWidth <= 0 || pHeight <= 0) return;
+
+            _renderer.Render(UniverseScene.Instance, pWidth, pHeight);        
+
+            // 3. 루프 유지
+            Dispatcher.BeginInvoke(new Action(() => GlControl.InvalidateVisual()),
+                                  System.Windows.Threading.DispatcherPriority.Input);
+        }
+
+
+        /// <summary>
+        /// 각 뷰포트(컨트롤)의 초기 카메라 위치를 설정합니다.
+        /// </summary>
+        private void SetupInitialCameras()
+        {
+            double earthRadius = Earth.EarthRadius;
+
+            // 왼쪽 창: 멀리서 지구 전체 보기 (고도 20,000km)
+            var cam = Renderer.ViewCamera;
+            cam.Target = OpenTK.Vector3d.Zero;
+            cam.Position = new OpenTK.Vector3d(0, 0, earthRadius + 20000.0);
+            cam.Up = OpenTK.Vector3d.UnitY;
+        }
+
+
+        private void InitializeSceneNodes()
+        {
+            if (_isUniverseInitialized) return;           
+
+            // 4. Dispatcher를 쓰지 않고 Invoke로 즉시 실행 시도
+            try
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    // 노드 직접 생성 및 추가
+                    var node = new EarthNode();
+                    SharedUniverse.AddNode(node);
+                    SetupInitialCameras();
+                    _isUniverseInitialized = true;                    
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"!!! 초기화 중 에러: {ex.Message}");
+            }
         }
 
         #endregion

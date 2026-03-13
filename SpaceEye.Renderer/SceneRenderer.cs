@@ -1,5 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SpaceEye.Common.Interfaces;
+using SpaceEye.Common.Scene;
 using SpaceEye.Core.Camera;
 using SpaceEye.Scene;
 
@@ -44,7 +46,7 @@ namespace SpaceEye.Renderer
         /// 1. 뷰포트 크기에 따라 카메라의 종횡비(Aspect Ratio)를 자동 업데이트합니다. <br/>
         /// 2. 카메라로부터 64비트 뷰 및 투영 행렬을 계산하여 씬에 전달합니다.
         /// </remarks>
-        public void Render(UniverseScene scene, double width, double height)
+        public void Render(IUniverseScene scene, double width, double height)
         {
             if (scene == null || width <= 0 || height <= 0) return;
 
@@ -57,6 +59,16 @@ namespace SpaceEye.Renderer
             // 필수: 매 프레임마다 버퍼를 깨끗이 비워야 '새로운' 지구가 보입니다.
             GL.ClearColor(0.05f, 0.05f, 0.1f, 1.0f); // 아주 짙은 남색 (우주 느낌)
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            // Face Culling 활성화
+            GL.Enable(EnableCap.CullFace);
+
+            // 뒤쪽(Back) 면을 그리지 않도록 설정
+            GL.CullFace(CullFaceMode.Back);
+
+            // 정점 생성 순서(Winding Order) 정의 
+            // 작성하신 정점 생성 코드가 CCW(반시계 방향)이므로 아래 설정이 맞습니다.
+            GL.FrontFace(FrontFaceDirection.Ccw);
 
             // --- 와이어프레임 설정 ---
             // 앞면과 뒷면 모두 선(Line)으로 그리도록 설정합니다.

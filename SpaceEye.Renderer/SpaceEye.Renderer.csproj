@@ -81,6 +81,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SpaceEye.Common\SpaceEye.Common.csproj">
+      <Project>{32CED294-8555-424F-A6B5-6CA1EAEF4BEC}</Project>
+      <Name>SpaceEye.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpaceEye.Core\SpaceEye.Core.csproj">
       <Project>{EBBFC81D-D580-4674-99CF-6777F8312184}</Project>
       <Name>SpaceEye.Core</Name>

@@ -15,5 +15,13 @@ namespace SpaceEye.Common.CelestialDefinition
         /// 지구 반지름
         /// </summary>
         static public double EarthRadius { get; } = 6378.137;
+
+        /// <summary>
+        /// 실제 지구의 자전 각속도 (Degrees per Second)입니다.
+        /// </summary>
+        /// <remarks>
+        /// 360도 / 86164.1초(항성일) ≒ 0.00417807 deg/s
+        /// </remarks>
+        static public double EarthRotationSpeedDegPerSec { get; } = 0.00417807462;
     }
 }
