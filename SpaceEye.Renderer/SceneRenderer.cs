@@ -50,43 +50,30 @@ namespace SpaceEye.Renderer
         {
             if (scene == null || width <= 0 || height <= 0) return;
 
-            // 1. 뷰포트를 컨트롤 전체 크기로 설정 (정중앙 렌더링의 핵심)
+            // 1. 뷰포트 및 카메라 설정 (한 번만 호출)
             GL.Viewport(0, 0, (int)width, (int)height);
-
-            // 2. 종횡비(Aspect Ratio)를 카메라에 전달하여 찌그러짐 방지
             ViewCamera.AspectRatio = width / height;
 
-            // 필수: 매 프레임마다 버퍼를 깨끗이 비워야 '새로운' 지구가 보입니다.
-            GL.ClearColor(0.05f, 0.05f, 0.1f, 1.0f); // 아주 짙은 남색 (우주 느낌)
+            // 2. 화면 비우기 (짙은 남색 배경)
+            GL.ClearColor(0.05f, 0.05f, 0.1f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // Face Culling 활성화
+            // 3. 기본 상태 설정
             GL.Enable(EnableCap.CullFace);
-
-            // 뒤쪽(Back) 면을 그리지 않도록 설정
             GL.CullFace(CullFaceMode.Back);
-
-            // 정점 생성 순서(Winding Order) 정의 
-            // 작성하신 정점 생성 코드가 CCW(반시계 방향)이므로 아래 설정이 맞습니다.
             GL.FrontFace(FrontFaceDirection.Ccw);
-
-            // --- 와이어프레임 설정 ---
-            // 앞면과 뒷면 모두 선(Line)으로 그리도록 설정합니다.
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-            // Depth Test 활성화 (지구의 앞면이 뒷면을 가리도록)
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Less);
 
-            // 뷰포트 설정
-            GL.Viewport(0, 0, (int)width, (int)height);
+            // ❌ 여기서 PolygonMode.Line을 설정하지 마세요! 
+            // 기본값인 Fill 상태로 두어 스카이박스가 정상적으로 면으로 그려지게 합니다.
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
-            // 카메라 행렬 업데이트
-            ViewCamera.AspectRatio = width / height;
+            // 카메라 행렬 가져오기
             var view = ViewCamera.GetViewMatrix();
             var projection = ViewCamera.GetProjectionMatrix();
 
-            // 씬 그리기
+            // 씬 그리기 (내부에서 스카이박스와 지구가 각각 그려짐)
             scene.RenderAll(view, projection);
         }
     }

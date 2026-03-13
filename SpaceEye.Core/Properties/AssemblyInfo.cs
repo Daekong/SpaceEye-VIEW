@@ -42,6 +42,7 @@ using System.Windows;
 
 
 // 어셈블리간 접근 허용
+[assembly: InternalsVisibleTo("SpaceEye.Scene.Common")]
 [assembly: InternalsVisibleTo("SpaceEye.Scene")]
 [assembly: InternalsVisibleTo("SpaceEye.Renderer")]
 [assembly: InternalsVisibleTo("SpaceEye_Viewer")]

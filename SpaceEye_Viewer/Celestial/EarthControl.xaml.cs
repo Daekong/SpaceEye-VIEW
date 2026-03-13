@@ -9,6 +9,7 @@ using SpaceEye.Renderer;
 using SpaceEye.Common.CelestialDefinition;
 using SpaceEye.Common.Scene;
 using SpaceEye.Common.Interfaces;
+using SpaceEye.Scene.Common;
 
 namespace SpaceEye_Viewer.Celestial
 {
@@ -190,8 +191,8 @@ namespace SpaceEye_Viewer.Celestial
                 this.Dispatcher.Invoke(() =>
                 {
                     // 노드 직접 생성 및 추가
-                    var node = new EarthNode();
-                    SharedUniverse.AddNode(node);
+                    UniverseScene.Instance.AddNode(new SkyboxNode());                   
+                    UniverseScene.Instance.AddNode(new EarthNode());
                     SetupInitialCameras();
                     _isUniverseInitialized = true;                    
                 });

@@ -40,6 +40,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -55,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Celestial\EarthNode.cs" />
+    <Compile Include="Common\SkyboxNode.cs" />
     <Compile Include="Interfaces\ISceneNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -91,6 +93,11 @@
       <Project>{ebbfc81d-d580-4674-99cf-6777f8312184}</Project>
       <Name>SpaceEye.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Resources\SpaceEye.Resources.csproj">
+      <Project>{fdf09116-9e5d-4ebb-8194-97921ab9001a}</Project>
+      <Name>SpaceEye.Resources</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

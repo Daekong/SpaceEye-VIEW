@@ -40,6 +40,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -56,6 +57,8 @@
   <ItemGroup>
     <Compile Include="Camera\Camera.cs" />
     <Compile Include="Celestial\SphereGenerator.cs" />
+    <Compile Include="Common\ShaderCompiler.cs" />
+    <Compile Include="Common\TextureLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -144,6 +144,7 @@ namespace SpaceEye.Scene
 
             // VAO 바인딩 후 인덱스 기반 삼각형 그리기 수행
             GL.BindVertexArray(_vao);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedInt, 0);
 
             // 상태 복구

@@ -122,6 +122,10 @@
       <Project>{1697FAD1-3B33-4694-9F14-F74017A3B194}</Project>
       <Name>SpaceEye.Renderer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SpaceEye.Resources\SpaceEye.Resources.csproj">
+      <Project>{fdf09116-9e5d-4ebb-8194-97921ab9001a}</Project>
+      <Name>SpaceEye.Resources</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpaceEye.Scene\SpaceEye.Scene.csproj">
       <Project>{5449C486-D5A4-402D-B578-953DB5B6BC49}</Project>
       <Name>SpaceEye.Scene</Name>
