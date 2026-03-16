@@ -127,7 +127,6 @@ namespace SpaceEye.Scene.Celestial
             // 예: 8K 해상도의 일반적인 평면 세계지도 이미지 파일
             // 1. Resource DLL의 이름 (예: SpaceEye.Resources)
             string basePath = Path.Combine(AppContext.BaseDirectory, "SpaceEye.Resouces", "Images", "BaseMap");
-
             _texture = TextureLoader.LoadTexture(Path.Combine(basePath, "Earth_BlueMarble_NextGeneration_2Km.jpg"));
 
             GL.BindVertexArray(_vao);

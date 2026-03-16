@@ -193,7 +193,7 @@ namespace SpaceEye_Viewer.Celestial
                 {
                     // 노드 직접 생성 및 추가
                     UniverseScene.Instance.AddNode(new SkyboxNode());                   
-                    UniverseScene.Instance.AddNode(new EarthNodeTES());
+                    UniverseScene.Instance.AddNode(new EarthNode());
                     SetupInitialCameras();
                     _isUniverseInitialized = true;                    
                 });

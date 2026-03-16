@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SpaceEye.Common.CelestialDefinition;
@@ -6,6 +7,7 @@ using SpaceEye.Common.Extensions;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Core;
 using SpaceEye.Core.Celestial;
+using SpaceEye.Core.Common;
 using SpaceEye.Scene.Interfaces;
 
 namespace SpaceEye.Scene
@@ -35,6 +37,8 @@ namespace SpaceEye.Scene
         private bool _isInitialized = false;
         /// <summary>현재 지구의 자전 각도 (Degrees)입니다.</summary>
         private double _rotationAngleDeg = 0;
+        // 지구 텍스처 ID 변수
+        private int _texture;
         #endregion
 
         #region # Constructor & Initialize
@@ -59,7 +63,7 @@ namespace SpaceEye.Scene
             if (_isInitialized) return;
 
             // 1. 64비트 구체 데이터 생성
-            var (vertices, indices) = SphereGenerator.GenerateSphere(Earth.EarthRadius, 32);
+            var (vertices, indices) = SphereGenerator.GenerateSphere(Earth.EarthRadius, 128);
             _indexCount = indices.Length;
 
             // 2. FP64 연산을 지원하는 고정밀 셰이더 프로그램 생성
@@ -69,6 +73,12 @@ namespace SpaceEye.Scene
             _vao = GL.GenVertexArray();
             _vbo = GL.GenBuffer();
             _ebo = GL.GenBuffer();
+
+            // 예: 8K 해상도의 일반적인 평면 세계지도 이미지 파일
+            // 1. Resource DLL의 이름 (예: SpaceEye.Resources)
+            string basePath = Path.Combine(AppContext.BaseDirectory, "SpaceEye.Resouces", "Images", "BaseMap");
+            _texture = TextureLoader.LoadTexture(Path.Combine(basePath, "Earth_BlueMarble_NextGeneration_2Km.jpg"));
+
 
             GL.BindVertexArray(_vao);
 
@@ -85,6 +95,11 @@ namespace SpaceEye.Scene
             // Stride: 정점 하나당 (X, Y, Z, U, V) 5개의 double을 가지므로 5 * 8 bytes입니다.
             GL.VertexAttribLPointer(0, 3, VertexAttribDoubleType.Double, 5 * sizeof(double), IntPtr.Zero);
             GL.EnableVertexAttribArray(0);
+
+            // 7. 정점 속성 정의 (Layout 1: Texture UV)
+            // U, V 데이터는 X, Y, Z (3개의 double) 뒤에 오므로, 오프셋을 3 * sizeof(double)로 줍니다.
+            GL.VertexAttribLPointer(1, 2, VertexAttribDoubleType.Double, 5 * sizeof(double), (IntPtr)(3 * sizeof(double)));
+            GL.EnableVertexAttribArray(1);
 
             GL.BindVertexArray(0);
             _isInitialized = true;
@@ -136,15 +151,25 @@ namespace SpaceEye.Scene
             int mLoc = GL.GetUniformLocation(_shader, "model");
             int vLoc = GL.GetUniformLocation(_shader, "view");
             int pLoc = GL.GetUniformLocation(_shader, "projection");
+            int texLoc = GL.GetUniformLocation(_shader, "earthTexture");
+
 
             // OpenTK 3.3.3은 ref Matrix4d 오버로딩을 통해 유니폼 전송을 지원합니다.
             GL.UniformMatrix4(mLoc, false, ref model);
             GL.UniformMatrix4(vLoc, false, ref view);
             GL.UniformMatrix4(pLoc, false, ref projection);
 
+            if (texLoc != -1) GL.Uniform1(texLoc, 0);
+
+            // 텍스처 활성화 및 바인딩
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, _texture);
+            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
             // VAO 바인딩 후 인덱스 기반 삼각형 그리기 수행
             GL.BindVertexArray(_vao);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+          
             GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedInt, 0);
 
             // 상태 복구
@@ -161,18 +186,48 @@ namespace SpaceEye.Scene
             // 중요: #version 앞에 공백이 단 한 칸도 있으면 안 됩니다.
             string vSrc = "#version 410 core\n" +
                           "layout(location = 0) in dvec3 aPos;\n" +
+                          "out vec3 LocalPos;\n" +
                           "uniform dmat4 model;\n" +
                           "uniform dmat4 view;\n" +
                           "uniform dmat4 projection;\n" +
                           "void main() {\n" +
-                          "    dvec4 clipPos = projection * view * model * dvec4(aPos, 1.0);\n" +
+                          "    // [Core Fix] Normalize in 64-bit precision first, then cast to 32-bit\n" +
+                          "    // This prevents precision loss and floating-point jittering (wobbling)\n" +
+                          "    LocalPos = vec3(normalize(aPos));\n" +
+                          "    \n" +
+                          "    dvec4 clipPos = projection * view * model * dvec4(aPos, 1.0lf);\n" +
                           "    gl_Position = vec4(clipPos);\n" +
                           "}\n";
 
             string fSrc = "#version 410 core\n" +
+                          "// Input local position from vertex shader\n" +
+                          "in vec3 LocalPos;\n" +
+                          "// Output final pixel color\n" +
                           "out vec4 FragColor;\n" +
+                          "// Earth satellite texture sampler\n" +
+                          "uniform sampler2D earthTexture;\n" +
+                          "const float PI = 3.14159265359;\n" +
                           "void main() {\n" +
-                          "    FragColor = vec4(0.2, 0.5, 0.8, 1.0);\n" +
+                          "    // Normalize the local 3D position to get a perfect direction vector\n" +
+                          "    vec3 n = normalize(LocalPos);\n" +
+                          "    \n" +
+                          "    // Convert 3D direction vector to 2D Equirectangular UV coordinates\n" +
+                          "    float u = 0.5 + atan(n.z, n.x) / (2.0 * PI);\n" +
+                          "    float v = 0.5 - asin(n.y) / PI;\n" +
+                          "    vec2 uv = vec2(u, v);\n" +
+                          "    \n" +
+                          "    // Mipmap seam tearing prevention logic\n" +
+                          "    vec2 dx = dFdx(uv);\n" +
+                          "    vec2 dy = dFdy(uv);\n" +
+                          "    \n" +
+                          "    // Correct the derivative if U jumps across the 0.0 to 1.0 boundary\n" +
+                          "    if (dx.x > 0.5) dx.x -= 1.0;\n" +
+                          "    if (dx.x < -0.5) dx.x += 1.0;\n" +
+                          "    if (dy.x > 0.5) dy.x -= 1.0;\n" +
+                          "    if (dy.x < -0.5) dy.x += 1.0;\n" +
+                          "    \n" +
+                          "    // Sample the texture using the corrected derivatives to hide the seam perfectly\n" +
+                          "    FragColor = textureGrad(earthTexture, uv, dx, dy);\n" +
                           "}\n";
 
             int vs = GL.CreateShader(ShaderType.VertexShader);
