@@ -60,98 +60,7 @@ namespace SpaceEye.Scene.Celestial
         private double _rotationAngleDeg = 0;
 
         // 지구 텍스처 ID 변수
-        private int _texture;
-
-        #region # 테셀레이션 셰이더 소스 (64비트 정밀도)
-
-        /// <summary>
-        /// 정점 셰이더(Vertex Shader)의 GLSL 소스 코드입니다. 
-        /// 테셀레이션 파이프라인에서는 좌표 변환 없이 입력된 정점 위치(<c>aPos</c>)를 그대로 제어 셰이더(TCS)로 전달하는 역할만 수행합니다.
-        /// </summary>
-        private const string VertexShaderSource =
-            "#version 410 core\n" +
-            "layout (location = 0) in dvec3 aPos;\n" +
-            "out dvec3 vPos;\n" +
-            "void main() {\n" +
-            "    vPos = aPos;\n" +
-            "}\n";
-
-        /// <summary>
-        /// 테셀레이션 제어 셰이더(Tessellation Control Shader, TCS)의 GLSL 소스 코드입니다.
-        /// 정점 셰이더로부터 넘겨받은 4개의 정점(Quad 패치)을 얼마나 세밀하게 쪼갤지 결정하는 테셀레이션 레벨(LOD)을 설정합니다.
-        /// </summary>
-        private const string TcsSource =
-            "#version 410 core\n" +
-            "layout (vertices = 4) out;\n" +
-            "in dvec3 vPos[];\n" +
-            "out dvec3 tcsPos[];\n" +
-            "void main() {\n" +
-            "    tcsPos[gl_InvocationID] = vPos[gl_InvocationID];\n" +
-            "    if (gl_InvocationID == 0) {\n" +
-            "        gl_TessLevelOuter[0] = 16.0;\n" +
-            "        gl_TessLevelOuter[1] = 16.0;\n" +
-            "        gl_TessLevelOuter[2] = 16.0;\n" +
-            "        gl_TessLevelOuter[3] = 16.0;\n" +
-            "        gl_TessLevelInner[0] = 16.0;\n" +
-            "        gl_TessLevelInner[1] = 16.0;\n" +
-            "    }\n" +
-            "}\n";
-
-        /// <summary>
-        /// 테셀레이션 평가 셰이더(TES):
-        /// 모델(Model) 행렬을 추가하여 회전 적용합니다.
-        /// 텍스처 매핑을 위해 구형의 법선(Normal) 벡터를 단편 셰이더로 전달합니다.
-        /// </summary>
-        private const string TesSource =
-            "#version 410 core\n" +
-            "layout (quads, equal_spacing, ccw) in;\n" +
-            "in dvec3 tcsPos[];\n" +
-            "out vec3 vNormal;\n" +
-            "uniform dmat4 model;\n" +
-            "uniform dmat4 view;\n" +
-            "uniform dmat4 projection;\n" +
-            "uniform double radius;\n" +
-            "void main() {\n" +
-            "    double u = gl_TessCoord.x;\n" +
-            "    double v = gl_TessCoord.y;\n" +
-            "    dvec3 p0 = mix(tcsPos[0], tcsPos[1], u);\n" +
-            "    dvec3 p1 = mix(tcsPos[3], tcsPos[2], u);\n" +
-            "    dvec3 p = mix(p0, p1, v);\n" +
-            "    \n" +
-            "    dvec3 normal = normalize(p);\n" +
-            "    vNormal = vec3(normal);\n" +           
-            "    dvec3 spherePos = normal * radius;\n" +
-            "    gl_Position = vec4(projection * view * model * dvec4(spherePos, 1.0lf));\n" +
-            "}\n";
-
-        /// <summary>
-        /// 단편 셰이더(Fragment Shader)의 GLSL 소스 코드입니다.
-        /// 테셀레이션 파이프라인을 거쳐 도출된 최종 픽셀의 색상을 결정하며, 현재는 와이어프레임 구조를 명확히 보기 위해 파란색 단색으로 출력합니다.
-        /// </summary>
-        private const string FragmentShaderSource =
-           "#version 410 core\n" +
-            "layout (location = 0) out vec4 FragColor;\n" +
-            "in vec3 vNormal;\n" +
-            "uniform sampler2D earthTexture;\n" +
-            "const float PI = 3.14159265359;\n" +
-            "void main() {\n" +
-            "    vec3 n = normalize(vNormal);\n" +            
-            "    float u = 0.5 + atan(n.z, n.x) / (2.0 * PI);\n" +
-            "    float v = 0.5 - asin(n.y) / PI;\n" +
-            "    vec2 uv = vec2(u, v);\n" +
-            "    \n" +
-            "    vec2 dx = dFdx(uv);\n" +
-            "    vec2 dy = dFdy(uv);\n" +
-            "    \n" +          
-            "    if(dx.x > 0.5) dx.x -= 1.0;\n" +
-            "    if(dx.x < -0.5) dx.x += 1.0;\n" +
-            "    if(dy.x > 0.5) dy.x -= 1.0;\n" +
-            "    if(dy.x < -0.5) dy.x += 1.0;\n" +
-            "    \n" +          
-            "    FragColor = textureGrad(earthTexture, uv, dx, dy);\n" +
-            "}\n";
-
-        #endregion
+        private int _texture; 
 
         #region # 정육면체(Cube) 정점 및 인덱스 데이터
 
@@ -202,8 +111,14 @@ namespace SpaceEye.Scene.Celestial
         /// </summary>
         public void Initialize()
         {
-            _shader = ShaderCompiler.CreateProgram(
-                VertexShaderSource, TcsSource, TesSource, FragmentShaderSource);
+            string vertexShaderSource = Path.Combine(AppContext.BaseDirectory, "SpaceEye.Shaders", "Celestials", "VertexShaders", "Earth.vert") ;
+            string tcsSource = Path.Combine(AppContext.BaseDirectory, "SpaceEye.Shaders", "Celestials", "TCSShaders", "Earth.tcs");
+            string tesSource = Path.Combine(AppContext.BaseDirectory, "SpaceEye.Shaders", "Celestials", "TESShaders", "Earth.tes");
+            string fragmentShaderSource = Path.Combine(AppContext.BaseDirectory, "SpaceEye.Shaders", "Celestials", "FragmentShaders", "Earth.frag"); ;
+
+
+            _shader = ShaderCompiler.CreateProgramFromFiles(
+                vertexShaderSource, tcsSource, tesSource, fragmentShaderSource);
 
             _vao = GL.GenVertexArray();
             _vbo = GL.GenBuffer();
@@ -261,6 +176,9 @@ namespace SpaceEye.Scene.Celestial
         {
             Matrix4d model = Matrix4d.CreateRotationY(_rotationAngleDeg.ToRadian());
 
+            Matrix4d invView = view.Inverted();
+            Vector3d camPos = new Vector3d(invView.Row3.X, invView.Row3.Y, invView.Row3.Z);
+
             GL.UseProgram(_shader);
 
             // 3. 모델, 뷰, 투영 행렬 전송
@@ -269,24 +187,25 @@ namespace SpaceEye.Scene.Celestial
             int projLoc = GL.GetUniformLocation(_shader, "projection");
             int radiusLoc = GL.GetUniformLocation(_shader, "radius");
             int texLoc = GL.GetUniformLocation(_shader, "earthTexture");
+            int camPosLoc = GL.GetUniformLocation(_shader, "cameraPos");
 
             if (modelLoc != -1) GL.UniformMatrix4(modelLoc, false, ref model); 
             if (viewLoc != -1) GL.UniformMatrix4(viewLoc, false, ref view);
             if (projLoc != -1) GL.UniformMatrix4(projLoc, false, ref projection);            
-            if (radiusLoc != -1) GL.Uniform1(radiusLoc, Earth.EarthRadius);           
-            if (texLoc != -1) GL.Uniform1(texLoc, 0);
+            if (radiusLoc != -1) GL.Uniform1(radiusLoc, Earth.EarthRadius);
+            if (camPosLoc != -1) GL.Uniform3(camPosLoc, camPos.X, camPos.Y, camPos.Z);
 
+            if (texLoc != -1) GL.Uniform1(texLoc, 0);            
+            
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, _texture);
 
-            GL.BindVertexArray(_vao);
-
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
+            GL.BindVertexArray(_vao);
             GL.PatchParameter(PatchParameterInt.PatchVertices, 4);
-            GL.DrawElements(PrimitiveType.Patches, _indexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);
-
-            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.DrawElements(PrimitiveType.Patches, _indexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);            
 
             GL.BindVertexArray(0);
             GL.UseProgram(0);

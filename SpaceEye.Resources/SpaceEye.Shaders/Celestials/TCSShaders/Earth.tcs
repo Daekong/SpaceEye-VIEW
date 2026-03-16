@@ -1,0 +1,59 @@
+﻿#version 410 core
+
+// Set output patch vertex count to 4 (Quad)
+layout (vertices = 4) out;
+
+// Input from Vertex Shader (64-bit precision)
+in dvec3 vPos[];
+
+// Output to Tessellation Evaluation Shader
+out dvec3 tcsPos[];
+
+// Uniforms for distance calculation
+uniform dmat4 model;      // World transformation matrix
+uniform dvec3 cameraPos;  // Camera world position
+uniform double radius;    // Earth radius (Km)
+
+// Dynamic LOD Settings (Km)
+const double MIN_DISTANCE = 6500.0lf;  // Close to surface (Max split)
+const double MAX_DISTANCE = 30000.0lf; // Far in space (Min split)
+const double MAX_TESS = 64.0lf;        // Maximum tessellation level
+const double MIN_TESS = 16.0lf;         // Minimum tessellation level (can be 2.0 to 16.0)
+
+// Calculate Tessellation Level based on distance
+double GetLOD(double dist) {
+    // Normalize distance to 0.0 ~ 1.0 ratio
+    double t = clamp((dist - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0.0lf, 1.0lf);
+    // Linear interpolation between MAX and MIN tessellation
+    return mix(MAX_TESS, MIN_TESS, t);
+}
+
+void main() {
+    // Pass the vertex position to the next stage
+    tcsPos[gl_InvocationID] = vPos[gl_InvocationID];
+
+    // Set tessellation levels only on the first invocation
+    if (gl_InvocationID == 0) {
+        // 1. Calculate world positions of the 4 patch vertices
+        dvec3 w0 = (model * dvec4(normalize(vPos[0]) * radius, 1.0lf)).xyz;
+        dvec3 w1 = (model * dvec4(normalize(vPos[1]) * radius, 1.0lf)).xyz;
+        dvec3 w2 = (model * dvec4(normalize(vPos[2]) * radius, 1.0lf)).xyz;
+        dvec3 w3 = (model * dvec4(normalize(vPos[3]) * radius, 1.0lf)).xyz;
+
+        // 2. Calculate distance from camera to each vertex
+        double d0 = distance(cameraPos, w0);
+        double d1 = distance(cameraPos, w1);
+        double d2 = distance(cameraPos, w2);
+        double d3 = distance(cameraPos, w3);
+
+        // 3. Outer Tessellation Levels (Based on the closest vertex of each edge)
+        gl_TessLevelOuter[0] = float(GetLOD(min(d3, d0))); // Left edge
+        gl_TessLevelOuter[1] = float(GetLOD(min(d0, d1))); // Bottom edge
+        gl_TessLevelOuter[2] = float(GetLOD(min(d1, d2))); // Right edge
+        gl_TessLevelOuter[3] = float(GetLOD(min(d2, d3))); // Top edge
+
+        // 4. Inner Tessellation Levels (Based on the closest vertex of the patch)
+        gl_TessLevelInner[0] = float(GetLOD(min(min(d0, d1), min(d2, d3))));
+        gl_TessLevelInner[1] = gl_TessLevelInner[0];
+    }
+}

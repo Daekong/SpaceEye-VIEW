@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using OpenTK;
+using SpaceEye.Common.CelestialDefinition;
 
 namespace SpaceEye.Core.Camera
 {
@@ -21,8 +22,18 @@ namespace SpaceEye.Core.Camera
     /// </remarks>
     internal class Camera
     {
+        #region # Fields
+
+        // 카메라가 지구 중심으로부터 떨어져 있는 거리 (Km 단위)
+        // 초기값이 있다면 그 변수를 사용하시면 됩니다. (예: Z 위치 또는 Radius)
+        private double _distance = Earth.EarthCameraMaxDistance;
+
+        #endregion
+
+        #region # Properties
+
         /// <summary>카메라의 현재 위치 좌표 (단위: km)입니다.</summary>
-        public Vector3d Position { get; set; } = new Vector3d(0, 0, 20000.0);
+        public Vector3d Position { get; set; } = new Vector3d(0, 0, Earth.EarthCameraMaxDistance);
 
         /// <summary>카메라가 바라보는 대상의 중심 좌표 (단위: km)입니다.</summary>
         public Vector3d Target { get; set; } = Vector3d.Zero;
@@ -42,6 +53,8 @@ namespace SpaceEye.Core.Camera
         /// <summary>카메라가 렌더링을 수행하는 최대 거리 (Far Clip Plane, 단위: km)입니다.</summary>
         /// <remarks>지구와 달의 거리를 고려하여 충분히 큰 값(예: 1,000,000km)으로 설정합니다.</remarks>
         public double Far { get; set; } = 2000000.0;
+
+        #endregion
 
         /// <summary>
         /// <see cref="Camera"/> 클래스의 새 인스턴스를 초기화합니다.
@@ -83,6 +96,34 @@ namespace SpaceEye.Core.Camera
         {
             // 이 메서드는 이후 마우스 핸들러 구현 시 
             // 구면 좌표계 변환을 통해 카메라 위치를 갱신하는 데 사용됩니다.
+        }
+
+        /// <summary>
+        /// 마우스 휠 스크롤 값에 따라 카메라 거리를 조절합니다.
+        /// </summary>
+        /// <param name="delta">마우스 휠 스크롤 변화량 (일반적으로 120 또는 -120)</param>
+        public void Zoom(double delta)
+        {
+            // 줌 속도 배율 (현재 거리에 비례해서 줌 속도가 달라지게 하면 훨씬 자연스럽습니다)
+            // 멀리 있을 때는 팍팍 줌인되고, 지표면에 가까울수록 세밀하게 줌인됩니다.
+            double zoomSpeed = _distance * 0.001;
+
+            // 휠을 위로 굴리면(양수) 줌인(거리 감소), 아래로 굴리면(음수) 줌아웃(거리 증가)
+            if (delta > 0)
+            {
+                _distance -= 120 * zoomSpeed; // 120은 일반적인 마우스 휠 1틱의 Delta 값
+            }
+            else if (delta < 0)
+            {
+                _distance += 120 * zoomSpeed;
+            }
+
+            // 카메라 거리가 한계치를 벗어나지 않도록 고정 (Clamp)
+            if (_distance < Earth.EarthCameraMinDistance) _distance = Earth.EarthCameraMinDistance;
+            if (_distance > Earth.EarthCameraMaxDistance) _distance = Earth.EarthCameraMaxDistance;
+
+            // 계산된 _distance를 바탕으로 카메라의 위치(Position) 벡터를 업데이트
+            Position = new Vector3d(0, 0, _distance);
         }
     }
 }

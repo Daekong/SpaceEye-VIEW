@@ -12,7 +12,7 @@ namespace SpaceEye.Common.CelestialDefinition
     static public class Earth
     {
         /// <summary>
-        /// 지구 반지름
+        /// 지구 반지름 (Km)
         /// </summary>
         static public double EarthRadius { get; } = 6378.137;
 
@@ -23,5 +23,15 @@ namespace SpaceEye.Common.CelestialDefinition
         /// 360도 / 86164.1초(항성일) ≒ 0.00417807 deg/s
         /// </remarks>
         static public double EarthRotationSpeedDegPerSec { get; } = 0.00417807462;
+
+        /// <summary>
+        /// 카메라 최대 줌 인 거리 (지구 반경 + 10km)
+        /// </summary>
+        static public double EarthCameraMinDistance { get; } = EarthRadius + 10;
+
+        /// <summary>
+        /// 카메라 최대 줌 아웃 거리 (Km)
+        /// </summary>
+        static public double EarthCameraMaxDistance { get; } = 100000.0;
     }
 }

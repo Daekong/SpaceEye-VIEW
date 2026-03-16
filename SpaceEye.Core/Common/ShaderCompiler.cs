@@ -49,6 +49,26 @@ namespace SpaceEye.Core.Common
         }
 
         /// <summary>
+        /// 외부 셰이더 파일의 경로를 입력받아 소스 코드를 읽은 후, 테셀레이션 셰이더 프로그램으로 컴파일하고 링크합니다.
+        /// </summary>
+        /// <param name="vertexPath">정점 셰이더 파일 경로</param>
+        /// <param name="tcsPath">테셀레이션 제어 셰이더(TCS) 파일 경로</param>
+        /// <param name="tesPath">테셀레이션 평가 셰이더(TES) 파일 경로</param>
+        /// <param name="fragmentPath">단편 셰이더 파일 경로</param>
+        /// <returns>생성된 테셀레이션 셰이더 프로그램의 식별자(ID)</returns>
+        public static int CreateProgramFromFiles(string vertexPath, string tcsPath, string tesPath, string fragmentPath)
+        {
+            // 1. 파일에서 텍스트(소스 코드) 읽어오기
+            string vertexSource = System.IO.File.ReadAllText(vertexPath);
+            string tcsSource = System.IO.File.ReadAllText(tcsPath);
+            string tesSource = System.IO.File.ReadAllText(tesPath);
+            string fragmentSource = System.IO.File.ReadAllText(fragmentPath);
+
+            // 2. 기존 문자열 기반 CreateProgram 함수 호출하여 반환
+            return CreateProgram(vertexSource, tcsSource, tesSource, fragmentSource);
+        }
+
+        /// <summary>
         /// 정점(VS), 테셀레이션 제어(TCS), 테셀레이션 평가(TES), 단편(FS) 셰이더를 모두 포함하여 컴파일하고 링크합니다.
         /// </summary>
         /// <param name="vertexSource">컴파일할 정점 셰이더의 GLSL 소스 코드입니다.</param>
