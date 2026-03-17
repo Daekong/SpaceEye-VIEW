@@ -96,6 +96,71 @@ namespace SpaceEye.Core.Common
         }
 
         /// <summary>
+        /// 2D 이미지 파일을 읽어 OpenGL 텍스처로 변환하고 식별자(ID)를 반환합니다.
+        /// </summary>
+        /// <param name="path">텍스처 이미지 파일의 상대 또는 절대 경로</param>
+        /// <returns>생성된 OpenGL 텍스처 ID</returns>
+        public static int LoadTexture(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException($"텍스처 파일을 찾을 수 없습니다: {path}");
+            }
+
+            // 1. 텍스처 ID 생성 및 바인딩
+            int handle = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, handle);
+
+            // 2. 텍스처 래핑(Wrapping) 설정
+            // 가로(S)는 지도가 이어지도록 Repeat, 세로(T)는 극지방이 깨지지 않도록 ClampToEdge 사용
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+            // 3. 텍스처 필터링(Filtering) 설정
+            // 축소 시 부드럽게 보이도록 Mipmap 사용, 확대 시 선명하게 Linear 사용
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            // 4. 비트맵 이미지 로드 및 GPU 메모리 전송
+            using (Bitmap image = new Bitmap(path))
+            {
+                // ⭐ OpenGL은 이미지의 좌하단을 (0,0)으로 인식하므로 상하 반전이 필요할 수 있습니다.
+                // 만약 지도가 위아래로 뒤집혀서 나온다면 아래 주석을 해제하세요.
+                // image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+                // 고속 메모리 접근을 위해 이미지를 메모리에 잠금
+                BitmapData data = image.LockBits(
+                    new System.Drawing.Rectangle(0, 0, image.Width, image.Height),
+                    ImageLockMode.ReadOnly,
+                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                // CPU(Bitmap)의 픽셀 데이터를 GPU로 복사
+                // C# Bitmap은 내부적으로 BGRA 순서로 픽셀을 저장하므로 PixelFormat.Bgra를 사용합니다.
+                GL.TexImage2D(
+                    TextureTarget.Texture2D,
+                    0,
+                    PixelInternalFormat.Rgba,
+                    image.Width,
+                    image.Height,
+                    0,
+                    OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                    PixelType.UnsignedByte,
+                    data.Scan0);
+
+                // 메모리 잠금 해제
+                image.UnlockBits(data);
+            }
+
+            // 5. 밉맵(Mipmap) 자동 생성 (멀리 있는 지형을 그릴 때 성능 및 화질 최적화)
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+            // 상태 안전 해제
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            return handle;
+        }  
+
+        /// <summary>
         /// 메모리에 로드된 6장의 비트맵(Bitmap) 이미지를 병합하여 하나의 큐브맵(Cubemap) 텍스처를 생성하고 GPU에 할당합니다.
         /// </summary>
         /// <param name="faces">
@@ -121,59 +186,59 @@ namespace SpaceEye.Core.Common
         /// </list>
         /// </remarks>
         public static int LoadCubemap(Bitmap[] faces)
-        {
-            if (faces == null)
             {
-                throw new ArgumentNullException(nameof(faces), "비트맵 배열이 null일 수 없습니다.");
+                if (faces == null)
+                {
+                    throw new ArgumentNullException(nameof(faces), "비트맵 배열이 null일 수 없습니다.");
+                }
+
+                if (faces.Length != 6)
+                {
+                    throw new ArgumentException("큐브맵을 생성하려면 정확히 6개의 비트맵 이미지가 필요합니다.", nameof(faces));
+                }
+
+                // 1. 텍스처 ID 생성 및 바인딩
+                int textureId = GL.GenTexture();
+                GL.BindTexture(TextureTarget.TextureCubeMap, textureId);
+
+                // 2. 6개의 이미지를 순회하며 GPU 메모리에 로드
+                for (int i = 0; i < faces.Length; i++)
+                {
+                    Bitmap image = faces[i];
+
+                    // 메모리 락을 걸어 픽셀 데이터에 안전하고 빠르게 접근
+                    BitmapData data = image.LockBits(
+                        new System.Drawing.Rectangle(0, 0, image.Width, image.Height),
+                        ImageLockMode.ReadOnly,
+                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                    // OpenGL 텍스처 타겟 계산 (+X부터 -Z까지 순차적으로 할당)
+                    TextureTarget target = TextureTarget.TextureCubeMapPositiveX + i;
+
+                    // 픽셀 데이터를 GPU로 전송 (Bitmap의 기본 포맷인 BGRA 사용)
+                    GL.TexImage2D(
+                        target,
+                        0,
+                        PixelInternalFormat.Rgba,
+                        image.Width,
+                        image.Height,
+                        0,
+                        PixelFormat.Bgra,
+                        PixelType.UnsignedByte,
+                        data.Scan0);
+
+                    // 메모리 락 해제
+                    image.UnlockBits(data);
+                }
+
+                // 3. 텍스처 필터링 및 래핑 파라미터 설정
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+
+                return textureId;
             }
-
-            if (faces.Length != 6)
-            {
-                throw new ArgumentException("큐브맵을 생성하려면 정확히 6개의 비트맵 이미지가 필요합니다.", nameof(faces));
-            }
-
-            // 1. 텍스처 ID 생성 및 바인딩
-            int textureId = GL.GenTexture();
-            GL.BindTexture(TextureTarget.TextureCubeMap, textureId);
-
-            // 2. 6개의 이미지를 순회하며 GPU 메모리에 로드
-            for (int i = 0; i < faces.Length; i++)
-            {
-                Bitmap image = faces[i];
-
-                // 메모리 락을 걸어 픽셀 데이터에 안전하고 빠르게 접근
-                BitmapData data = image.LockBits(
-                    new System.Drawing.Rectangle(0, 0, image.Width, image.Height),
-                    ImageLockMode.ReadOnly,
-                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                // OpenGL 텍스처 타겟 계산 (+X부터 -Z까지 순차적으로 할당)
-                TextureTarget target = TextureTarget.TextureCubeMapPositiveX + i;
-
-                // 픽셀 데이터를 GPU로 전송 (Bitmap의 기본 포맷인 BGRA 사용)
-                GL.TexImage2D(
-                    target,
-                    0,
-                    PixelInternalFormat.Rgba,
-                    image.Width,
-                    image.Height,
-                    0,
-                    PixelFormat.Bgra,
-                    PixelType.UnsignedByte,
-                    data.Scan0);
-
-                // 메모리 락 해제
-                image.UnlockBits(data);
-            }
-
-            // 3. 텍스처 필터링 및 래핑 파라미터 설정
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-
-            return textureId;
-        }
     }
 }

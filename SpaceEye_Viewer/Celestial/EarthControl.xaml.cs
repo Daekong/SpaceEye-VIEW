@@ -10,6 +10,7 @@ using SpaceEye.Common.CelestialDefinition;
 using SpaceEye.Common.Scene;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Scene.Common;
+using SpaceEye.Scene.Celestial;
 
 namespace SpaceEye_Viewer.Celestial
 {
@@ -73,6 +74,7 @@ namespace SpaceEye_Viewer.Celestial
 
             // 화면 로드가 완료된 시점에 렌더링을 시작하도록 이벤트 등록
             this.Loaded += EarthControl_Loaded;
+            GlControl.MouseWheel += OnMouseWheel;
         }
 
         #endregion
@@ -103,9 +105,7 @@ namespace SpaceEye_Viewer.Celestial
                     // 만약 그래도 안 된다면, 강제로 무효화하여 다시 그리게 만듭니다.
                     GlControl.InvalidateVisual();
 
-                    InitializeSceneNodes();
-
-                    System.Diagnostics.Debug.WriteLine("OpenTK Start() has been called.");
+                    InitializeSceneNodes();                   
                 }
                 catch (Exception ex)
                 {
@@ -165,7 +165,6 @@ namespace SpaceEye_Viewer.Celestial
                                   System.Windows.Threading.DispatcherPriority.Input);
         }
 
-
         /// <summary>
         /// 각 뷰포트(컨트롤)의 초기 카메라 위치를 설정합니다.
         /// </summary>
@@ -176,11 +175,13 @@ namespace SpaceEye_Viewer.Celestial
             // 왼쪽 창: 멀리서 지구 전체 보기 (고도 20,000km)
             var cam = Renderer.ViewCamera;
             cam.Target = OpenTK.Vector3d.Zero;
-            cam.Position = new OpenTK.Vector3d(0, 0, earthRadius + 20000.0);
+            cam.Position = new OpenTK.Vector3d(0, 0, Earth.EarthCameraMaxDistance);
             cam.Up = OpenTK.Vector3d.UnitY;
         }
 
-
+        /// <summary>
+        /// Control의 초기 Scene을 구성합니다.
+        /// </summary>
         private void InitializeSceneNodes()
         {
             if (_isUniverseInitialized) return;           
@@ -201,6 +202,24 @@ namespace SpaceEye_Viewer.Celestial
             {
                 System.Diagnostics.Debug.WriteLine($"!!! 초기화 중 에러: {ex.Message}");
             }
+        }
+
+        #endregion
+
+        #region # Events 
+
+        /// <summary>
+        /// 마우스 휠 스크롤 시 호출되어 카메라 줌을 수행합니다.
+        /// </summary>
+        private void OnMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            // e.Delta는 보통 위로 굴릴 때 +120, 아래로 굴릴 때 -120이 들어옵니다.
+            _renderer.ViewCamera.Zoom(e.Delta);
+
+            // 이벤트 처리가 완료되었음을 시스템에 알림
+            e.Handled = true;
+
+            // 화면을 즉시 갱신해야 한다면 렌더링 트리거를 호출하세요. (예: glControl.Invalidate();)
         }
 
         #endregion
