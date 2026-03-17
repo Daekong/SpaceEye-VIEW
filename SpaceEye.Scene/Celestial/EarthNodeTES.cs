@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.TextFormatting;
 using System.IO;
+using SpaceEye.Core.Camera;
 
 namespace SpaceEye.Scene.Celestial
 {
@@ -149,8 +150,10 @@ namespace SpaceEye.Scene.Celestial
 
         /// <summary>
         /// 매 프레임마다 지구의 자전 각도를 갱신합니다.
-        /// </summary>
-        public void Update(double deltaSeconds)
+        /// </summary>       
+        /// <param name="deltaSeconds">이전 프레임부터 경과된 시간(초)입니다.</param>
+        /// <param name="ICamera">카메라 인터페이스</param>
+        public void Update(double deltaSeconds, ICamera camera)
         {
             // 시뮬레이션 속도 배율 (예: 1.0은 실시간, 3600.0은 1시간을 1초에 진행)
             double timeScale = 1000.0;
@@ -164,7 +167,7 @@ namespace SpaceEye.Scene.Celestial
 
         #endregion
 
-        #region # Public Method
+        #region # ISceneNode
 
         /// <summary>
         /// 화면에 지구 노드를 그립니다. 매 프레임마다 호출됩니다.
@@ -207,9 +210,7 @@ namespace SpaceEye.Scene.Celestial
             GL.DrawElements(PrimitiveType.Patches, _indexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);            
 
             GL.BindVertexArray(0);
-            GL.UseProgram(0);
-
-            ErrorCode code = GL.GetError();
+            GL.UseProgram(0);           
         }
 
         #endregion
@@ -225,6 +226,11 @@ namespace SpaceEye.Scene.Celestial
             GL.DeleteBuffer(_vbo);
             GL.DeleteBuffer(_ebo);
             GL.DeleteProgram(_shader);
+        }
+
+        public void Update(double deltaSeconds, System.Windows.Media.Media3D.Camera camera)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

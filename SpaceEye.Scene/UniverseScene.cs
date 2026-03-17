@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using SpaceEye.Common.Interfaces;
+using SpaceEye.Core.Camera;
 using SpaceEye.Scene.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -90,14 +91,15 @@ namespace SpaceEye.Common.Scene
         /// 씬에 등록된 노드 중 시간 업데이트가 필요한 객체들의 상태를 일괄 갱신합니다.
         /// </summary>
         /// <param name="deltaSeconds">프레임 간 경과 시간(초)입니다.</param>
+        /// <param name="ICamera">카메라</param>
         /// <remarks>
         /// <see cref="ITimeUpdateable"/> 인터페이스를 구현한 노드만 선별하여 <c>Update</c>를 호출합니다.
         /// </remarks>
-        public void UpdateAll(double deltaSeconds)
+        public void UpdateAll(double deltaSeconds, ICamera camera)
         {
             // 성능 최적화가 필요할 경우, AddNode 시점에 업데이트 가능 노드만 별도 리스트로 관리할 수 있습니다.
             foreach (var node in _updateableNodes)
-                node.Update(deltaSeconds);          
+                node.Update(deltaSeconds, camera);          
         }
 
         #endregion
@@ -127,9 +129,9 @@ namespace SpaceEye.Common.Scene
         /// </summary>
         public void Clear()
         {
-            foreach (var node in _nodes)
+            foreach (IDisposable node in _nodes)
             {
-                node.Dispose();
+               node.Dispose();
             }
             _nodes.Clear();
         }

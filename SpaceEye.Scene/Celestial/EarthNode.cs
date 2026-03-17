@@ -6,6 +6,7 @@ using SpaceEye.Common.CelestialDefinition;
 using SpaceEye.Common.Extensions;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Core;
+using SpaceEye.Core.Camera;
 using SpaceEye.Core.Celestial;
 using SpaceEye.Core.Common;
 using SpaceEye.Scene.Interfaces;
@@ -37,7 +38,9 @@ namespace SpaceEye.Scene
         private bool _isInitialized = false;
         /// <summary>현재 지구의 자전 각도 (Degrees)입니다.</summary>
         private double _rotationAngleDeg = 0;
-        // 지구 텍스처 ID 변수
+        /// <summary>
+        /// 지구 텍스처 ID 변수
+        /// </summary>
         private int _texture;
         #endregion
 
@@ -111,8 +114,10 @@ namespace SpaceEye.Scene
 
         /// <summary>
         /// 매 프레임마다 지구의 자전 각도를 갱신합니다.
-        /// </summary>
-        public void Update(double deltaSeconds)
+        /// </summary> 
+        /// <param name="deltaSeconds">이전 프레임부터 경과된 시간(초)입니다.</param>
+        /// <param name="ICamera">카메라</param>
+        public void Update(double deltaSeconds, ICamera camera)
         {
             // 시뮬레이션 속도 배율 (예: 1.0은 실시간, 3600.0은 1시간을 1초에 진행)
             double timeScale = 1000.0;
@@ -283,6 +288,11 @@ namespace SpaceEye.Scene
                 GL.DeleteProgram(_shader);
                 _isInitialized = false;
             }
+        }
+
+        public void Update(double deltaSeconds, System.Windows.Media.Media3D.Camera camera)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

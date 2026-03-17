@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using OpenTK;
 using SpaceEye.Common.CelestialDefinition;
+using SpaceEye.Common.Interfaces;
 
 namespace SpaceEye.Core.Camera
 {
@@ -20,7 +21,7 @@ namespace SpaceEye.Core.Camera
     /// 단위 체계는 킬로미터(km)를 사용하며, OpenGL의 오른손 좌표계를 따릅니다.
     /// </para>
     /// </remarks>
-    internal class Camera
+    internal class Camera : ICamera
     {
         #region # Fields
 
@@ -43,6 +44,12 @@ namespace SpaceEye.Core.Camera
 
         /// <summary>수직 시야각 (Field of View, 단위: Degree)입니다.</summary>
         public double Fov { get; set; } = 45.0f;
+
+        /// <summary>화면의 종횡비 (너비 / 높이)입니다.</summary>
+        public double ScreenWidth { get; set; } = 100.0f;
+
+        /// <summary>화면의 종횡비 (너비 / 높이)입니다.</summary>
+        public double ScreenHeight { get; set; } = 100.0f;
 
         /// <summary>화면의 종횡비 (너비 / 높이)입니다.</summary>
         public double AspectRatio { get; set; } = 1.0f;

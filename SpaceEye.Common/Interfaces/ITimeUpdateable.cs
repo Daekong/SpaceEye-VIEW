@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,9 +19,10 @@ namespace SpaceEye.Common.Interfaces
         /// 경과 시간(Delta Time)을 기반으로 객체의 내부 상태(회전각, 좌표 등)를 업데이트합니다.
         /// </summary>
         /// <param name="deltaSeconds">이전 프레임 이후 현재 프레임까지 경과된 초 단위 시간입니다.</param>
+        /// <param name="ICamera">카메라 인터페이스</param>
         /// <remarks>
         /// 프레임 독립적인 물리 연산을 위해 반드시 이 <paramref name="deltaSeconds"/>를 계산에 활용해야 합니다.
         /// </remarks>
-        void Update(double deltaSeconds);
-    }
+        void Update(double deltaSeconds, ICamera camera);
+    }    
 }
