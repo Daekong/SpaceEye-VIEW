@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using SpaceEye.Common.CelestialDefinition;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Core.Camera;
 using SpaceEye.Scene.Interfaces;
@@ -37,8 +38,7 @@ namespace SpaceEye.Common.Scene
 
         #endregion
 
-        #region # Fields
-
+        #region # Fields        
         /// <summary>
         /// 현재 씬에 등록된 모든 렌더링 노드의 목록입니다.
         /// </summary>
@@ -46,6 +46,13 @@ namespace SpaceEye.Common.Scene
 
         // 업데이트가 필요한 노드만 따로 모은 리스트 (캐싱)
         private readonly List<ITimeUpdateable> _updateableNodes = new List<ITimeUpdateable>();
+
+        #endregion
+
+        #region # Properties
+
+        /// <summary>와이어 프레임 도시 여부입니다.</summary>
+        public bool IsWireframe { get; set; }
 
         #endregion
 
@@ -59,6 +66,7 @@ namespace SpaceEye.Common.Scene
         /// </remarks>
         private UniverseScene()
         {
+            IsWireframe = false;
         }
 
         #endregion
