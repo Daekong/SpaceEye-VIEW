@@ -17,11 +17,6 @@ namespace SpaceEye.Scene.Interfaces
         /// </summary>
         /// <param name="view">뷰 행렬</param>
         /// <param name="projection">투영 행렬</param>
-        void Draw(Matrix4d view, Matrix4d projection);
-
-        /// <summary>
-        /// 메모리 및 GPU 리소스를 해제합니다.
-        /// </summary>
-        void Dispose();
+        void Draw(Matrix4d view, Matrix4d projection);        
     }
 }

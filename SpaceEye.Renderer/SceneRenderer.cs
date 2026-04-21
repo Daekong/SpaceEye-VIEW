@@ -52,6 +52,8 @@ namespace SpaceEye.Renderer
 
             // 1. 뷰포트 및 카메라 설정 (한 번만 호출)
             GL.Viewport(0, 0, (int)width, (int)height);
+            ViewCamera.ScreenWidth = width;
+            ViewCamera.ScreenHeight = height;
             ViewCamera.AspectRatio = width / height;
 
             // 2. 화면 비우기 (짙은 남색 배경)

@@ -13,6 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.TextFormatting;
 using System.IO;
+using SpaceEye.Core.Camera;
+using SpaceEye.Common.Scene;
 
 namespace SpaceEye.Scene.Celestial
 {
@@ -60,7 +62,7 @@ namespace SpaceEye.Scene.Celestial
         private double _rotationAngleDeg = 0;
 
         // 지구 텍스처 ID 변수
-        private int _texture; 
+        private int _texture;         
 
         #region # 정육면체(Cube) 정점 및 인덱스 데이터
 
@@ -149,8 +151,10 @@ namespace SpaceEye.Scene.Celestial
 
         /// <summary>
         /// 매 프레임마다 지구의 자전 각도를 갱신합니다.
-        /// </summary>
-        public void Update(double deltaSeconds)
+        /// </summary>       
+        /// <param name="deltaSeconds">이전 프레임부터 경과된 시간(초)입니다.</param>
+        /// <param name="ICamera">카메라 인터페이스</param>
+        public void Update(double deltaSeconds, ICamera camera)
         {
             // 시뮬레이션 속도 배율 (예: 1.0은 실시간, 3600.0은 1시간을 1초에 진행)
             double timeScale = 1000.0;
@@ -164,7 +168,7 @@ namespace SpaceEye.Scene.Celestial
 
         #endregion
 
-        #region # Public Method
+        #region # ISceneNode
 
         /// <summary>
         /// 화면에 지구 노드를 그립니다. 매 프레임마다 호출됩니다.
@@ -180,36 +184,45 @@ namespace SpaceEye.Scene.Celestial
 
             GL.UseProgram(_shader);
 
-            // 3. 모델, 뷰, 투영 행렬 전송
+            // 3. 모델, 뷰, 투영 행렬 전송          
+
             int modelLoc = GL.GetUniformLocation(_shader, "model");
             int viewLoc = GL.GetUniformLocation(_shader, "view");
             int projLoc = GL.GetUniformLocation(_shader, "projection");
             int radiusLoc = GL.GetUniformLocation(_shader, "radius");
             int texLoc = GL.GetUniformLocation(_shader, "earthTexture");
             int camPosLoc = GL.GetUniformLocation(_shader, "cameraPos");
+            int wireColorLoc = GL.GetUniformLocation(_shader, "wireColor");
+            int isWireframeLoc = GL.GetUniformLocation(_shader, "isWireframe");
 
             if (modelLoc != -1) GL.UniformMatrix4(modelLoc, false, ref model); 
             if (viewLoc != -1) GL.UniformMatrix4(viewLoc, false, ref view);
             if (projLoc != -1) GL.UniformMatrix4(projLoc, false, ref projection);            
             if (radiusLoc != -1) GL.Uniform1(radiusLoc, Earth.EarthRadius);
             if (camPosLoc != -1) GL.Uniform3(camPosLoc, camPos.X, camPos.Y, camPos.Z);
+            if (isWireframeLoc != -1) GL.Uniform1(isWireframeLoc, UniverseScene.Instance.IsWireframe ? 1 : 0); 
+            if (wireColorLoc != -1) GL.Uniform3(wireColorLoc, 0.0f, 1.0f, 0.0f); 
 
-            if (texLoc != -1) GL.Uniform1(texLoc, 0);            
+            if (texLoc != -1) GL.Uniform1(texLoc, 0);         
             
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, _texture);
-
-            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            // 와이어 프레임 여부에 따라 텍스텨 또는 Line 설정
+            if(UniverseScene.Instance.IsWireframe)
+            {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            }
+            else
+            {
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, _texture);
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);                
+            }
 
             GL.BindVertexArray(_vao);
             GL.PatchParameter(PatchParameterInt.PatchVertices, 4);
-            GL.DrawElements(PrimitiveType.Patches, _indexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);            
+            GL.DrawElements(PrimitiveType.Patches, _indexCount, DrawElementsType.UnsignedInt, IntPtr.Zero);           
 
             GL.BindVertexArray(0);
-            GL.UseProgram(0);
-
-            ErrorCode code = GL.GetError();
+            GL.UseProgram(0);           
         }
 
         #endregion
@@ -225,6 +238,11 @@ namespace SpaceEye.Scene.Celestial
             GL.DeleteBuffer(_vbo);
             GL.DeleteBuffer(_ebo);
             GL.DeleteProgram(_shader);
+        }
+
+        public void Update(double deltaSeconds, System.Windows.Media.Media3D.Camera camera)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

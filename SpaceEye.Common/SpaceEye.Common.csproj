@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="CelestialDefinition\Earth.cs" />
     <Compile Include="Extensions\DoubleExtensions.cs" />
+    <Compile Include="Interfaces\ICamera.cs" />
     <Compile Include="Interfaces\ITimeUpdateable.cs" />
     <Compile Include="Interfaces\IUniverseScene.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

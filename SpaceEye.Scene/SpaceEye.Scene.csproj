@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Celestial\EarthNode.cs" />
+    <Compile Include="Celestial\EarthNodeLod.cs" />
     <Compile Include="Celestial\EarthNodeTES.cs" />
     <Compile Include="Common\SkyboxNode.cs" />
     <Compile Include="Interfaces\ISceneNode.cs" />

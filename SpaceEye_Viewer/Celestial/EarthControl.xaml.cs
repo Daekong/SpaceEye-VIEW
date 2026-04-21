@@ -150,7 +150,7 @@ namespace SpaceEye_Viewer.Celestial
             _lastTime = currentTime;
 
             // UniverseScene 싱글톤을 통해 ITimeUpdateable 노드들의 Update(deltaSeconds) 일괄 호출
-            UniverseScene.Instance.UpdateAll(deltaSeconds);
+            UniverseScene.Instance.UpdateAll(deltaSeconds, _renderer.ViewCamera as ICamera);
 
             // ---------------------------------------------------------
 
@@ -193,7 +193,7 @@ namespace SpaceEye_Viewer.Celestial
                 {
                     // 노드 직접 생성 및 추가
                     UniverseScene.Instance.AddNode(new SkyboxNode());                   
-                    UniverseScene.Instance.AddNode(new EarthNode());
+                    UniverseScene.Instance.AddNode(new EarthNodeLod());
                     SetupInitialCameras();
                     _isUniverseInitialized = true;                    
                 });

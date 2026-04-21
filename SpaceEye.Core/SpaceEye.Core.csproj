@@ -77,6 +77,7 @@
     <Compile Include="Celestial\SphereGenerator.cs" />
     <Compile Include="Common\ShaderCompiler.cs" />
     <Compile Include="Common\TextureLoader.cs" />
+    <Compile Include="Helpers\CullingHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
