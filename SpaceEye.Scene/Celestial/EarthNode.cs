@@ -186,7 +186,7 @@ namespace SpaceEye.Scene
         private int CreateDoublePrecisionShader()
         {
             // 중요: #version 앞에 공백이 단 한 칸도 있으면 안 됩니다.
-            string vSrc = "#version 410 core\n" +
+            string vSrc = "#version 430 core\n" +
                           "layout(location = 0) in dvec3 aPos;\n" +
                           "out vec3 LocalPos;\n" +
                           "uniform dmat4 model;\n" +
@@ -201,7 +201,7 @@ namespace SpaceEye.Scene
                           "    gl_Position = vec4(clipPos);\n" +
                           "}\n";
 
-            string fSrc = "#version 410 core\n" +
+            string fSrc = "#version 430 core\n" +
                           "// Input local position from vertex shader\n" +
                           "in vec3 LocalPos;\n" +
                           "// Output final pixel color\n" +

@@ -1,4 +1,4 @@
-﻿#version 410 core
+﻿#version 430 core
 
 // Set output patch vertex count to 4 (Quad)
 layout (vertices = 4) out;

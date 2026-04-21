@@ -1,4 +1,4 @@
-﻿#version 410 core
+﻿#version 430 core
 
 // Input from C# (64-bit precision 3D coordinates of the cube)
 layout (location = 0) in dvec3 aPos;

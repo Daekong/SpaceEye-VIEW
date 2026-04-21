@@ -79,7 +79,7 @@ namespace SpaceEye.Scene.Common
         #region # Shader Files
         // 스카이박스용 셰이더 소스 (내장) - 32비트 Float
         private const string VertexShaderSource =
-            "#version 410 core\n" +
+            "#version 430 core\n" +
             "layout (location = 0) in vec3 aPos;\n" +
             "out vec3 TexCoords;\n" +
             "uniform mat4 view;\n" +
@@ -92,7 +92,7 @@ namespace SpaceEye.Scene.Common
             "}\n";
 
         private const string FragmentShaderSource =
-            "#version 410 core\n" +
+            "#version 430 core\n" +
             "layout (location = 0) out vec4 FragColor;\n" +
             "in vec3 TexCoords;\n" +
             "uniform samplerCube skybox;\n" +

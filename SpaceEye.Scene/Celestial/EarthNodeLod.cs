@@ -310,7 +310,7 @@ namespace SpaceEye.Scene.Celestial
         /// </summary>
         private int CreateShader()
         {
-            string vSrc = "#version 410 core\n" +
+            string vSrc = "#version 430 core\n" +
               "layout(location = 0) in dvec3 aPos;\n" +
               "uniform dmat4 model, view, projection;\n" +
               "out vec3 vNormal;\n" +
@@ -321,7 +321,7 @@ namespace SpaceEye.Scene.Celestial
               "    gl_Position = vec4(projection * view * model * dvec4(aPos, 1.0lf));\n" +
               "}\n";
 
-            string fSrc = "#version 410 core\n" +
+            string fSrc = "#version 430 core\n" +
               "out vec4 FragColor;\n" +
               "in vec3 vNormal;\n" +
               "uniform sampler2D earthTexture;\n" +
@@ -369,6 +369,10 @@ namespace SpaceEye.Scene.Celestial
 
         #endregion
 
+        #region # Public Method
+
+        #endregion
+
         #region # IDisposable
 
         public void Dispose()
@@ -381,12 +385,7 @@ namespace SpaceEye.Scene.Celestial
                 GL.DeleteProgram(_shader);
                 _isInitialized = false;
             }
-        }
-
-        public void Update(double deltaSeconds, System.Windows.Media.Media3D.Camera camera)
-        {
-            throw new NotImplementedException();
-        }
+        }    
 
         #endregion
     }
