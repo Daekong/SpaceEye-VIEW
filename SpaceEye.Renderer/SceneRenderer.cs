@@ -22,6 +22,11 @@ namespace SpaceEye.Renderer
     internal class SceneRenderer
     {
         /// <summary>
+        /// 화면(PIP) 전용 마스크
+        /// </summary>
+        private int _visibilitySsbo;
+
+        /// <summary>
         /// 이 렌더러가 관리하는 고유 카메라 인스턴스입니다.
         /// </summary>
         /// <remarks>
@@ -74,6 +79,9 @@ namespace SpaceEye.Renderer
             // 카메라 행렬 가져오기
             var view = ViewCamera.GetViewMatrix();
             var projection = ViewCamera.GetProjectionMatrix();
+
+            // ★ 핵심: 우주를 그리기 직전에 내 화면 전용 Visibility 버퍼를 2번 슬롯에 바인딩
+            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 2, _visibilitySsbo);            
 
             // 씬 그리기 (내부에서 스카이박스와 지구가 각각 그려짐)
             scene.RenderAll(view, projection);
