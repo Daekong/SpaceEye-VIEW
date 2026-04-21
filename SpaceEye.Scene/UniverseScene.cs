@@ -54,6 +54,11 @@ namespace SpaceEye.Common.Scene
         /// <summary>와이어 프레임 도시 여부입니다.</summary>
         public bool IsWireframe { get; set; }
 
+        /// <summary>
+        ///     시간에 따른 업데이트 여부
+        /// </summary>
+        public bool IsTimeUpdate { get; set; }
+
         #endregion
 
         #region # Constructor
@@ -104,10 +109,11 @@ namespace SpaceEye.Common.Scene
         /// <see cref="ITimeUpdateable"/> 인터페이스를 구현한 노드만 선별하여 <c>Update</c>를 호출합니다.
         /// </remarks>
         public void UpdateAll(double deltaSeconds, ICamera camera)
-        {
+        {           
             // 성능 최적화가 필요할 경우, AddNode 시점에 업데이트 가능 노드만 별도 리스트로 관리할 수 있습니다.
             foreach (var node in _updateableNodes)
-                node.Update(deltaSeconds, camera);          
+                node.Update(deltaSeconds, camera);
+                   
         }
 
         #endregion

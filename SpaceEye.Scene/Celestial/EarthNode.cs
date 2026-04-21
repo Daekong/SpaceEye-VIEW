@@ -119,11 +119,8 @@ namespace SpaceEye.Scene
         /// <param name="ICamera">카메라</param>
         public void Update(double deltaSeconds, ICamera camera)
         {
-            // 시뮬레이션 속도 배율 (예: 1.0은 실시간, 3600.0은 1시간을 1초에 진행)
-            double timeScale = 1000.0;
-
             // Degree 기반 각도 계산
-            _rotationAngleDeg -= Earth.EarthRotationSpeedDegPerSec * deltaSeconds * timeScale;
+            _rotationAngleDeg -= Earth.EarthRotationSpeedDegPerSec * deltaSeconds;
 
             // 360도 도달 시 다시 0도로 순환 (부동 소수점 정밀도 유지)
             _rotationAngleDeg %= 360.0;

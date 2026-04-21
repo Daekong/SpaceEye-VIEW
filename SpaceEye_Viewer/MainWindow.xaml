@@ -8,6 +8,12 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <celestial:EarthControl/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <celestial:EarthControl Grid.Column="0"/>
+        <celestial:EarthControl Grid.Column="2"/>
     </Grid>
 </Window>

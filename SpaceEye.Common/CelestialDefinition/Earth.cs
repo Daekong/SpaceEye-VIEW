@@ -27,7 +27,7 @@ namespace SpaceEye.Common.CelestialDefinition
         /// <summary>
         /// 카메라 최대 줌 인 거리 (지구 반경 + 10km)
         /// </summary>
-        static public double EarthCameraMinDistance { get; } = EarthRadius + 10;
+        static public double EarthCameraMinDistance { get; } = EarthRadius + 1;
 
         /// <summary>
         /// 카메라 최대 줌 아웃 거리 (Km)

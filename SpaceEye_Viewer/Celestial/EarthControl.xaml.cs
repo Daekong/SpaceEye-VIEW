@@ -21,7 +21,7 @@ namespace SpaceEye_Viewer.Celestial
     {
         #region # Fields
 
-        private bool _isUniverseInitialized = false;
+        private static bool _isUniverseInitialized = false;
 
         /// <summary>
         /// 모든 <see cref="EarthControl"/> 인스턴스가 공유하여 렌더링할 통합 우주 씬입니다.
@@ -51,6 +51,16 @@ namespace SpaceEye_Viewer.Celestial
         #region # Propertie
 
         /// <summary>
+        ///     시간에 따른 업데이트 수행 여부
+        /// </summary>
+        public bool IsTimeUpdate { get; set; } = true;
+
+        /// <summary>
+        ///     시간 속도 배율 (예: 1.0은 실시간, 3600.0은 1시간을 1초에 진행)
+        /// </summary>
+        public double TimeScale { get; set; } = 1000.0;
+
+        /// <summary>
         /// 우주 배경색 (R, G, B, A)
         /// </summary>
         public float[] BackgroundColor { get; set; } = new float[] { 0.02f, 0.02f, 0.05f, 1.0f };
@@ -71,10 +81,11 @@ namespace SpaceEye_Viewer.Celestial
 
             // 1. 여기서 직접 Render 이벤트를 강력하게 연결합니다!
             GlControl.Render += GlControl_Render;
-
+            GlControl.MouseWheel += OnMouseWheel;
+            
             // 화면 로드가 완료된 시점에 렌더링을 시작하도록 이벤트 등록
             this.Loaded += EarthControl_Loaded;
-            GlControl.MouseWheel += OnMouseWheel;
+          
         }
 
         #endregion
@@ -88,30 +99,26 @@ namespace SpaceEye_Viewer.Celestial
         /// <param name="e">이벤트 관련 데이터</param>
         private void EarthControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Dispatcher를 사용하여 UI 렌더링 준비가 완전히 끝난 '후'에 실행되도록 예약합니다.
-            Dispatcher.BeginInvoke(new Action(() =>
+            // 뷰포트(Control)가 생성될 때마다 각자의 OpenGL 렌더링을 시작합니다.
+            var settings = new GLWpfControlSettings
             {
-                try
-                {
-                    var settings = new GLWpfControlSettings
-                    {
-                        MajorVersion = 4,
-                        MinorVersion = 1, // 호환성을 위해 4.1
-                        RenderContinuously = true
-                    };
+                MajorVersion = 4,
+                MinorVersion = 3,
+                RenderContinuously = true
+            };
 
-                    GlControl.Start(settings);
+            try
+            {
+                GlControl.Start(settings);
+                GlControl.InvalidateVisual();
 
-                    // 만약 그래도 안 된다면, 강제로 무효화하여 다시 그리게 만듭니다.
-                    GlControl.InvalidateVisual();
-
-                    InitializeSceneNodes();                   
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error: {ex.Message}");
-                }
-            }), System.Windows.Threading.DispatcherPriority.Background);          
+                // 렌더링 시작 후 씬 데이터를 초기화하러 갑니다.
+                InitializeSceneNodes();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Viewport Start Error: {ex.Message}");
+            }
         }
 
         #endregion
@@ -145,13 +152,15 @@ namespace SpaceEye_Viewer.Celestial
 
             // 1. [핵심] 물리 업데이트 (Update 단계)
             // 렌더링 직전에 현재 시간과 이전 프레임 시간의 차이를 계산해 넘겨줍니다.
-            DateTime currentTime = DateTime.Now;
-            double deltaSeconds = (currentTime - _lastTime).TotalSeconds;
-            _lastTime = currentTime;
+            if (IsTimeUpdate)
+            {
+                DateTime currentTime = DateTime.Now;
+                double deltaSeconds = (currentTime - _lastTime).TotalSeconds;
+                _lastTime = currentTime;               
 
-            // UniverseScene 싱글톤을 통해 ITimeUpdateable 노드들의 Update(deltaSeconds) 일괄 호출
-            UniverseScene.Instance.UpdateAll(deltaSeconds, _renderer.ViewCamera as ICamera);
-
+                // UniverseScene 싱글톤을 통해 ITimeUpdateable 노드들의 Update(deltaSeconds) 일괄 호출
+                UniverseScene.Instance.UpdateAll(deltaSeconds * TimeScale, _renderer.ViewCamera as ICamera);
+            }
             // ---------------------------------------------------------
 
             // 2. [핵심] 렌더링 (Draw 단계)
@@ -184,18 +193,25 @@ namespace SpaceEye_Viewer.Celestial
         /// </summary>
         private void InitializeSceneNodes()
         {
-            if (_isUniverseInitialized) return;           
+            // 1. 카메라는 컨트롤마다 각자 가져야 하므로 무조건 셋팅합니다.
+            SetupInitialCameras();
 
-            // 4. Dispatcher를 쓰지 않고 Invoke로 즉시 실행 시도
+            // 2. 우주 데이터(지구, 스카이박스)는 싱글톤이므로 단 한 번만 로드합니다.
+            // 이미 다른 컨트롤이 로드했다면 여기서 함수를 종료합니다!
+            if (_isUniverseInitialized) return;
+
             try
             {
                 this.Dispatcher.Invoke(() =>
                 {
-                    // 노드 직접 생성 및 추가
-                    UniverseScene.Instance.AddNode(new SkyboxNode());                   
+                    // 혹시 모를 동시 실행을 대비해 한 번 더 체크 (Double-check)
+                    if (_isUniverseInitialized) return;
+
+                    UniverseScene.Instance.AddNode(new SkyboxNode());
                     UniverseScene.Instance.AddNode(new EarthNodeTES());
-                    SetupInitialCameras();
-                    _isUniverseInitialized = true;                    
+
+                    // 첫 번째 컨트롤이 무사히 우주를 만들었으므로 도장 쾅!
+                    _isUniverseInitialized = true;
                 });
             }
             catch (Exception ex)

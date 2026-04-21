@@ -89,12 +89,9 @@ namespace SpaceEye.Scene.Celestial
 
             // 2. 지구 자전(Rotation) 계산 (회전이 켜져 있을 때만 작동)
             if (_isRotationEnabled)
-            {
-                // 시뮬레이션 속도 배율 (예: 1000.0배속으로 회전 관찰)
-                double timeScale = 1000.0;
-
+            {       
                 // 시간 경과에 따른 누적 자전 각도 계산 (Degree 단위)
-                _rotationAngleDeg += Earth.EarthRotationSpeedDegPerSec * deltaSeconds * timeScale;
+                _rotationAngleDeg += Earth.EarthRotationSpeedDegPerSec * deltaSeconds;
 
                 // 360도를 넘어가면 0도로 순환시켜 부동 소수점 오차 누적을 방지합니다.
                 _rotationAngleDeg %= 360.0;
