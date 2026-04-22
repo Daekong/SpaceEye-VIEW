@@ -59,10 +59,10 @@ namespace SpaceEye.Core.Common
         public static int CreateProgramFromFiles(string vertexPath, string tcsPath, string tesPath, string fragmentPath)
         {
             // 1. 파일에서 텍스트(소스 코드) 읽어오기
-            string vertexSource = System.IO.File.ReadAllText(vertexPath);
-            string tcsSource = System.IO.File.ReadAllText(tcsPath);
-            string tesSource = System.IO.File.ReadAllText(tesPath);
-            string fragmentSource = System.IO.File.ReadAllText(fragmentPath);
+            string vertexSource = System.IO.File.ReadAllText(vertexPath, System.Text.Encoding.UTF8);
+            string tcsSource = System.IO.File.ReadAllText(tcsPath, System.Text.Encoding.UTF8);
+            string tesSource = System.IO.File.ReadAllText(tesPath, System.Text.Encoding.UTF8);
+            string fragmentSource = System.IO.File.ReadAllText(fragmentPath, System.Text.Encoding.UTF8);
 
             // 2. 기존 문자열 기반 CreateProgram 함수 호출하여 반환
             return CreateProgram(vertexSource, tcsSource, tesSource, fragmentSource);

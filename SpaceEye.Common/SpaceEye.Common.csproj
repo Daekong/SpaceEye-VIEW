@@ -75,6 +75,7 @@
     <Compile Include="CelestialDefinition\Earth.cs" />
     <Compile Include="Enums\ProjectionMode.cs" />
     <Compile Include="Extensions\DoubleExtensions.cs" />
+    <Compile Include="Extensions\MatrixExtensions.cs" />
     <Compile Include="Interfaces\ICamera.cs" />
     <Compile Include="Interfaces\ITimeUpdateable.cs" />
     <Compile Include="Interfaces\IUniverseScene.cs" />

@@ -170,8 +170,6 @@ namespace SpaceEye.Scene.Common
             
             // 3. 생성된 Bitmap 배열을 TextureLoader로 넘겨 GPU에 업로드
             _texture = TextureLoader.LoadCubemap(resources);
-
-            ErrorCode data = GL.GetError();
         }
 
         /// <summary>

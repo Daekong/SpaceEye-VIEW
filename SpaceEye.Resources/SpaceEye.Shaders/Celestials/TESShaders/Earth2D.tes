@@ -1,0 +1,45 @@
+﻿#version 430 core
+
+/**
+ * @file Earth2D.tes
+ * @brief 세분화된 정점의 최종 위치를 계산하는 평가 셰이더입니다.
+ * @remarks 64비트 정밀도 행렬 연산을 수행하여 거대 스케일 좌표 오차를 방지합니다.
+ */
+
+layout (quads, equal_spacing, ccw) in;
+
+// CPU로부터 전달받은 64비트 행렬
+uniform dmat4 model;
+uniform dmat4 view;
+uniform dmat4 projection;
+
+in dvec3 vPosTES[];
+in dvec2 vTexCoordTES[];
+
+out vec2 vTexCoord;
+
+/**
+ * @brief 선형 보간 함수 (Double Precision)
+ */
+dvec3 dlerp(dvec3 a, dvec3 b, double t) { return a + (b - a) * t; }
+dvec2 dlerp(dvec2 a, dvec2 b, double t) { return a + (b - a) * t; }
+
+void main() {
+    double u = gl_TessCoord.x;
+    double v = gl_TessCoord.y;
+
+    // 4개의 제어점으로부터 현재 테셀레이션 좌표 보간
+    dvec3 p0 = dlerp(vPosTES[0], vPosTES[1], u);
+    dvec3 p1 = dlerp(vPosTES[3], vPosTES[2], u);
+    dvec3 pos = dlerp(p0, p1, v);
+
+    dvec2 t0 = dlerp(vTexCoordTES[0], vTexCoordTES[1], u);
+    dvec2 t1 = dlerp(vTexCoordTES[3], vTexCoordTES[2], u);
+    dvec2 tex = dlerp(t0, t1, v);
+
+    // 최종 위치 계산 (64비트 연산 후 32비트 gl_Position으로 변환)
+    gl_Position = vec4(projection * view * model * dvec4(pos, 1.0));
+    
+    // Fragment Shader로 보간된 UV 전달
+    vTexCoord = vec2(tex);
+}

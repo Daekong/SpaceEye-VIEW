@@ -72,7 +72,7 @@ namespace SpaceEye.Common.Scene
         /// </remarks>
         private UniverseScene()
         {
-            IsWireframe = false;
+            IsWireframe = true;
         }
 
         #endregion

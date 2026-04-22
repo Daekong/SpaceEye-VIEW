@@ -99,6 +99,18 @@
     <Content Include="SpaceEye.Shaders\Celestials\VertexShaders\Earth.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SpaceEye.Shaders\Celestials\FragmentShaders\Earth2D.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SpaceEye.Shaders\Celestials\TCSShaders\Earth2D.tcs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SpaceEye.Shaders\Celestials\TESShaders\Earth2D.tes">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SpaceEye.Shaders\Celestials\VertexShaders\Earth2D.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -14,7 +14,7 @@ namespace SpaceEye.Common.Enums
         /// <summary>
         ///     2차원 모드
         /// </summary>
-        OrthoGrapics,
+        Orthographic,
 
         /// <summary>
         ///     3차원 모드

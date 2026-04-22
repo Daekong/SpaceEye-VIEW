@@ -481,7 +481,7 @@ namespace SpaceEye.Scene.Celestial
                 : tileResolutionThreshold;       // 안 쪼개졌다면, 기본값 기준으로 쪼갠다. (약 217픽셀)
 
             // 화면 차지 픽셀이 텍스처 한계 해상도를 넘어서려 하면 쪼갭니다!
-            if (Level < 2 || (chunkScreenSizePixels > tileResolutionThreshold && Level < MaxLevel))
+            if (Level < 2 || (chunkScreenSizePixels > thresholdWithHysteresis && Level < MaxLevel))
             {
                 if (Children == null) Split();
 
