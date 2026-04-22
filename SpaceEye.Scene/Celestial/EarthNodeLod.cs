@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SpaceEye.Common.CelestialDefinition;
+using SpaceEye.Common.Enums;
 using SpaceEye.Common.Extensions;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Common.Scene;
@@ -62,6 +63,11 @@ namespace SpaceEye.Scene.Celestial
         #endregion
 
         #region # Properties
+
+        /// <summary>
+        ///     프로젝션 모드 입니다.
+        /// </summary>
+        public ProjectionMode ProjectionMode { get; } = ProjectionMode.Perspective;
 
         /// <summary>
         /// 지구의 자전(회전)을 활성화하거나 비활성화합니다.
@@ -152,7 +158,7 @@ namespace SpaceEye.Scene.Celestial
         /// <summary>
         /// 화면에 지구 노드를 그립니다. 매 프레임마다 호출됩니다.
         /// </summary>
-        public void Draw(Matrix4d view, Matrix4d projection)
+        public void Draw(Matrix4d view, Matrix4d projection, ProjectionMode renderMode)
         {
             // 초기화가 안 되었거나 그려야 할 청크가 없으면 중단
             if (!_isInitialized || _renderQueue.Count == 0) return;

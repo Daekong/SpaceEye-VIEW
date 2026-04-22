@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Windows.Media.Media3D;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SpaceEye.Common.CelestialDefinition;
+using SpaceEye.Common.Enums;
 using SpaceEye.Common.Extensions;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Core;
@@ -21,7 +23,7 @@ namespace SpaceEye.Scene
     /// 정점 데이터 생성부터 셰이더 연산까지 모든 과정을 <see cref="Double"/> 정밀도로 처리합니다.  
     /// </remarks>
     internal class EarthNode : ISceneNode, ITimeUpdateable, IDisposable
-    {
+    {        
         #region # Fields
 
         /// <summary>정점 배열 객체(VAO) ID입니다.</summary>
@@ -38,10 +40,17 @@ namespace SpaceEye.Scene
         private bool _isInitialized = false;
         /// <summary>현재 지구의 자전 각도 (Degrees)입니다.</summary>
         private double _rotationAngleDeg = 0;
-        /// <summary>
-        /// 지구 텍스처 ID 변수
-        /// </summary>
+        /// <summary> 지구 텍스처 ID 변수</summary>
         private int _texture;
+        #endregion
+
+        #region # Properties
+
+        /// <summary>
+        ///     프로젝션 모드 입니다.
+        /// </summary>
+        public ProjectionMode ProjectionMode { get; } = ProjectionMode.Perspective;
+
         #endregion
 
         #region # Constructor & Initialize
@@ -135,10 +144,11 @@ namespace SpaceEye.Scene
         /// </summary>
         /// <param name="view">카메라의 64비트 뷰 행렬입니다.</param>
         /// <param name="projection">카메라의 64비트 투영 행렬입니다.</param>
+        /// <param name="renderMode">현재 Scene의 ProjectionMode</param>
         /// <remarks>
         /// 모든 행렬 연산은 GPU 내부에서 <c>dmat4</c>(64비트)를 통해 수행되어 우주적 스케일의 정밀도를 유지합니다.
         /// </remarks>
-        public void Draw(Matrix4d view, Matrix4d projection)
+        public void Draw(Matrix4d view, Matrix4d projection, ProjectionMode renderMode)
         {
             if (!_isInitialized) return;
 

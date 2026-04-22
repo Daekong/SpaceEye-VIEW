@@ -76,7 +76,7 @@ namespace SpaceEye.Renderer
             var projection = ViewCamera.GetProjectionMatrix(); 
 
             // 씬 그리기 (내부에서 스카이박스와 지구가 각각 그려짐)
-            scene.RenderAll(view, projection);
+            scene.RenderAll(view, projection, Common.Enums.ProjectionMode.Perspective);
         }
     }
 }

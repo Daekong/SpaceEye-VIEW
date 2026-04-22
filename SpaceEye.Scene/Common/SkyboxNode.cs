@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SpaceEye.Common.Enums;
 using SpaceEye.Core.Common;
 using SpaceEye.Scene.Interfaces;
 using System;
@@ -73,6 +74,15 @@ namespace SpaceEye.Scene.Common
             -1.0f,  1.0f, -1.0f,  -1.0f,  1.0f,  1.0f,   1.0f,  1.0f,  1.0f,
              1.0f,  1.0f,  1.0f,   1.0f,  1.0f, -1.0f,  -1.0f,  1.0f, -1.0f
         };
+
+        #endregion
+
+        #region # Properties
+
+        /// <summary>
+        ///     프로젝션 모드 입니다.
+        /// </summary>
+        public ProjectionMode ProjectionMode { get; } = ProjectionMode.Perspective;
 
         #endregion
 
@@ -169,11 +179,12 @@ namespace SpaceEye.Scene.Common
         /// </summary>
         /// <param name="view">카메라의 뷰 행렬(View Matrix)입니다.</param>
         /// <param name="projection">카메라의 투영 행렬(Projection Matrix)입니다.</param>
+        /// <param name="renderMode">현재 Scene의 ProjectionMode</param>
         /// <remarks>
         /// 뷰 행렬에서 이동(Translation) 성분을 강제로 제거하여 배경이 항상 카메라와 동일한 거리를 유지하도록 합니다.
         /// 또한, 배경이 항상 다른 객체들의 뒤에 그려지도록 깊이 테스트 함수를 <see cref="DepthFunction.Lequal"/>로 임시 변경합니다.
         /// </remarks>
-        public void Draw(Matrix4d view, Matrix4d projection)
+        public void Draw(Matrix4d view, Matrix4d projection, ProjectionMode renderMode)
         {
             // [중요: 다운캐스팅] CPU의 64비트(Matrix4d)를 GPU가 받을 수 있게 32비트(Matrix4)로 변환
             // 동시에 카메라의 이동(Translation) 성분을 0으로 만들어 우주가 따라오게 합니다.

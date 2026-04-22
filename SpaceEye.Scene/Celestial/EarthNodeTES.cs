@@ -15,6 +15,7 @@ using System.Windows.Media.TextFormatting;
 using System.IO;
 using SpaceEye.Core.Camera;
 using SpaceEye.Common.Scene;
+using SpaceEye.Common.Enums;
 
 namespace SpaceEye.Scene.Celestial
 {
@@ -96,7 +97,16 @@ namespace SpaceEye.Scene.Celestial
 
         #endregion
 
-        #endregion        
+        #endregion
+
+        #region # Properties
+
+        /// <summary>
+        ///     프로젝션 모드 입니다.
+        /// </summary>
+        public ProjectionMode ProjectionMode { get; } = ProjectionMode.Perspective;
+
+        #endregion
 
         #region # Constructor & Initialize
 
@@ -172,7 +182,8 @@ namespace SpaceEye.Scene.Celestial
         /// </summary>
         /// <param name="view">카메라의 위치와 방향을 나타내는 뷰 행렬 (64비트)</param>
         /// <param name="projection">카메라의 원근감을 나타내는 투영 행렬 (64비트)</param>
-        public void Draw(Matrix4d view, Matrix4d projection)
+        /// <param name="renderMode">현재 Scene의 ProjectionMode</param>
+        public void Draw(Matrix4d view, Matrix4d projection, ProjectionMode renderMode)
         {
             Matrix4d model = Matrix4d.CreateRotationY(_rotationAngleDeg.ToRadian());
 

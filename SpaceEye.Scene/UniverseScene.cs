@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using SpaceEye.Common.CelestialDefinition;
+using SpaceEye.Common.Enums;
 using SpaceEye.Common.Interfaces;
 using SpaceEye.Core.Camera;
 using SpaceEye.Scene.Interfaces;
@@ -83,16 +84,18 @@ namespace SpaceEye.Common.Scene
         /// </summary>
         /// <param name="view">카메라의 뷰 행렬(View Matrix)입니다.</param>
         /// <param name="projection">카메라의 투영 행렬(Projection Matrix)입니다.</param>
+        /// <param name="mode">Render할 Projection Mode 입니다.</param>
         /// <remarks>
         /// 이 메서드는 씬에 포함된 각 노드의 <see cref="ISceneNode.Draw(Matrix4d, Matrix4d)"/>를 순차적으로 호출합니다.
         /// </remarks>
-        public void RenderAll(Matrix4d view, Matrix4d projection)
+        public void RenderAll(Matrix4d view, Matrix4d projection, ProjectionMode mode)
         {
             // 렌더링 도중 노드가 동적으로 삭제되는 상황이 발생할 경우 
             // foreach 대신 역순 for문 사용을 권장합니다.
             foreach (var node in _nodes)
             {
-                node.Draw(view, projection);
+                if(node.ProjectionMode.Equals(mode))
+                    node.Draw(view, projection, mode);
             }
         }
 

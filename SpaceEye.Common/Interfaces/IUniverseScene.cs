@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using SpaceEye.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,10 +26,13 @@ namespace SpaceEye.Common.Interfaces
         /// <param name="projection">
         /// 화면의 화각(FOV)과 종횡비를 결정하는 64비트 정밀도 투영 행렬(Projection Matrix)입니다.
         /// </param>
+        /// <param name="projection">
+        /// Rendering할 Projection Mode 입니다. (Orthgrapics / Perspective)
+        /// </param>
         /// <remarks>
         /// 이 메서드가 호출되면 씬 그래프에 포함된 모든 노드들이 
         /// 전달받은 행렬을 기반으로 GPU 파이프라인에 정점을 투사합니다.
         /// </remarks>
-        void RenderAll(Matrix4d view, Matrix4d projection);
+        void RenderAll(Matrix4d view, Matrix4d projection, ProjectionMode mode);
     }
 }

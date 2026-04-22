@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using SpaceEye.Common.Enums;
 
 namespace SpaceEye.Scene.Interfaces
 {
@@ -7,6 +8,11 @@ namespace SpaceEye.Scene.Interfaces
     /// </summary>
     internal interface ISceneNode
     {
+        /// <summary>
+        /// 객체의 모드를 설정합니다.
+        /// </summary>
+        ProjectionMode ProjectionMode { get; }
+
         /// <summary>
         /// GPU 리소스(VBO, 셰이더 등)를 초기화합니다.
         /// </summary>
@@ -17,6 +23,7 @@ namespace SpaceEye.Scene.Interfaces
         /// </summary>
         /// <param name="view">뷰 행렬</param>
         /// <param name="projection">투영 행렬</param>
-        void Draw(Matrix4d view, Matrix4d projection);        
+        /// <param name="renderMode">현재 Scene의 ProjectionMode</param>
+        void Draw(Matrix4d view, Matrix4d projection, ProjectionMode renderMode);        
     }
 }

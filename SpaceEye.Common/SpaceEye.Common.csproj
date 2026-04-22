@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CelestialDefinition\Earth.cs" />
+    <Compile Include="Enums\ProjectionMode.cs" />
     <Compile Include="Extensions\DoubleExtensions.cs" />
     <Compile Include="Interfaces\ICamera.cs" />
     <Compile Include="Interfaces\ITimeUpdateable.cs" />
