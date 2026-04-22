@@ -2,13 +2,14 @@
 
 /**
  * @file Earth2D.tes
- * @brief 세분화된 정점의 최종 위치를 계산하는 평가 셰이더입니다.
- * @remarks 64비트 정밀도 행렬 연산을 수행하여 거대 스케일 좌표 오차를 방지합니다.
+ * @brief 64비트 행렬 연산을 수행하여 최종 정점 위치를 결정합니다.
  */
+
+#extension GL_ARB_gpu_shader_fp64 : enable
 
 layout (quads, equal_spacing, ccw) in;
 
-// CPU로부터 전달받은 64비트 행렬
+/// @brief C# Matrix4d와 매칭되는 64비트 유니폼 행렬
 uniform dmat4 model;
 uniform dmat4 view;
 uniform dmat4 projection;
@@ -16,30 +17,30 @@ uniform dmat4 projection;
 in dvec3 vPosTES[];
 in dvec2 vTexCoordTES[];
 
+/// @brief Fragment Shader로 전달할 보간된 UV (32비트 float로 변환)
 out vec2 vTexCoord;
 
-/**
- * @brief 선형 보간 함수 (Double Precision)
- */
-dvec3 dlerp(dvec3 a, dvec3 b, double t) { return a + (b - a) * t; }
-dvec2 dlerp(dvec2 a, dvec2 b, double t) { return a + (b - a) * t; }
-
 void main() {
+    // 테셀레이션 좌표 (0.0 ~ 1.0)
     double u = gl_TessCoord.x;
     double v = gl_TessCoord.y;
 
-    // 4개의 제어점으로부터 현재 테셀레이션 좌표 보간
-    dvec3 p0 = dlerp(vPosTES[0], vPosTES[1], u);
-    dvec3 p1 = dlerp(vPosTES[3], vPosTES[2], u);
-    dvec3 pos = dlerp(p0, p1, v);
+    // 1. 64비트 정밀도로 위치 보간 수행 (Linear Interpolation)
+    dvec3 p0 = vPosTES[0] + (vPosTES[1] - vPosTES[0]) * u;
+    dvec3 p1 = vPosTES[3] + (vPosTES[2] - vPosTES[3]) * u;
+    dvec3 pos = p0 + (p1 - p0) * v;
 
-    dvec2 t0 = dlerp(vTexCoordTES[0], vTexCoordTES[1], u);
-    dvec2 t1 = dlerp(vTexCoordTES[3], vTexCoordTES[2], u);
-    dvec2 tex = dlerp(t0, t1, v);
+    // 2. 64비트 행렬 곱셈 (Clip Space 변환)
+    // dmat4 * dvec4 연산으로 정밀도 유지
+    dvec4 clipPos = projection * view * model * dvec4(pos, 1.0);
 
-    // 최종 위치 계산 (64비트 연산 후 32비트 gl_Position으로 변환)
-    gl_Position = vec4(projection * view * model * dvec4(pos, 1.0));
+    // 3. 시스템 출력 (Rasterizer는 32비트 float를 기대함)
+    gl_Position = vec4(clipPos);
+
+    // 4. UV 좌표 보간 및 전달
+    dvec2 t0 = vTexCoordTES[0] + (vTexCoordTES[1] - vTexCoordTES[0]) * u;
+    dvec2 t1 = vTexCoordTES[3] + (vTexCoordTES[2] - vTexCoordTES[3]) * u;
+    dvec2 tex = t0 + (t1 - t0) * v;
     
-    // Fragment Shader로 보간된 UV 전달
     vTexCoord = vec2(tex);
 }

@@ -154,28 +154,31 @@ namespace SpaceEye.Scene.Celestial
         /// <param name="renderMode">현재 렌더링 모드입니다.</param>
         public void Draw(Matrix4d view, Matrix4d projection, ProjectionMode renderMode)
         {
+            if (_shader == 0) return;
             GL.UseProgram(_shader);
 
-            // 2D에서는 모델 행렬을 기본값으로 사용하거나 필요 시 위치 조정
+            // 1. 모델 행렬 생성 (64비트 Identity)
             Matrix4d model = Matrix4d.Identity;
 
+            // 2. 유니폼 위치 획득
             int modelLoc = GL.GetUniformLocation(_shader, "model");
             int viewLoc = GL.GetUniformLocation(_shader, "view");
             int projLoc = GL.GetUniformLocation(_shader, "projection");
             int offsetLoc = GL.GetUniformLocation(_shader, "uOffset");
-            int isWireframeLoc = GL.GetUniformLocation(_shader, "isWireframe");
-            int wireColorLoc = GL.GetUniformLocation(_shader, "wireColor");
 
+            // 3. [핵심] 64비트 행렬 직접 전송
+            // OpenTK의 GL.UniformMatrix4(int, bool, ref Matrix4d) 오버로드를 사용합니다.
+            // 이 메서드는 셰이더의 'dmat4' 유니폼과 통신합니다.
             if (modelLoc != -1) GL.UniformMatrix4(modelLoc, false, ref model);
             if (viewLoc != -1) GL.UniformMatrix4(viewLoc, false, ref view);
             if (projLoc != -1) GL.UniformMatrix4(projLoc, false, ref projection);
-            if (offsetLoc != -1) GL.Uniform1(offsetLoc, _spinOffset);
-            if (isWireframeLoc != -1) GL.Uniform1(isWireframeLoc, UniverseScene.Instance.IsWireframe ? 1 : 0);
-            if (wireColorLoc != -1) GL.Uniform3(wireColorLoc, 1.0f, 1.0f, 0.0f); // Yellow
 
+            // 4. 기타 유니폼 전송
+            if (offsetLoc != -1) GL.Uniform1(offsetLoc, _spinOffset);
+
+            // 5. 텍스처 및 VAO 바인딩 후 그리기
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, _texture);
-
             GL.BindVertexArray(_vao);
             GL.PatchParameter(PatchParameterInt.PatchVertices, 4);
             GL.DrawElements(PrimitiveType.Patches, 4, DrawElementsType.UnsignedInt, IntPtr.Zero);

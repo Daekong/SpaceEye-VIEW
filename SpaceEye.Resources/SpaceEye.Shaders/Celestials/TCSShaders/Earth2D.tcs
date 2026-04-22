@@ -2,25 +2,25 @@
 
 /**
  * @file Earth2D.tcs
- * @brief 2D 평면 지도의 64비트 테셀레이션 제어 셰이더입니다.
+ * @brief 2D 평면 지도의 세분화 수준을 결정하는 제어 셰이더입니다.
  */
 
-// 64비트(double) 정밀도 지원을 위해 확장을 명시적으로 활성화 (드라이버 호환성 강화)
 #extension GL_ARB_gpu_shader_fp64 : enable
 
 layout (vertices = 4) out;
 
-// VS에서 넘어온 64비트 입력 데이터
+/// @brief Vertex Shader로부터 전달된 64비트 정점 및 UV 데이터
 in dvec3 vPosTCS[];
 in dvec2 vTexCoordTCS[];
 
-// TES로 넘겨줄 64비트 출력 데이터
+/// @brief Tessellation Evaluation Shader로 전달할 64비트 데이터
 out dvec3 vPosTES[];
 out dvec2 vTexCoordTES[];
 
 void main() {
     /**
      * @remarks 패치의 세분화 수준을 설정합니다.
+     * 16.0은 2D 평면에서 텍스처 왜곡을 방지하고 부드러운 렌더링을 제공하기에 충분한 수치입니다.
      */
     if (gl_InvocationID == 0) {
         gl_TessLevelOuter[0] = 16.0;
@@ -32,7 +32,6 @@ void main() {
         gl_TessLevelInner[1] = 16.0;
     }
 
-    // 인덱스를 명시하여 정확하게 매핑
     vPosTES[gl_InvocationID] = vPosTCS[gl_InvocationID];
     vTexCoordTES[gl_InvocationID] = vTexCoordTCS[gl_InvocationID];
 }
