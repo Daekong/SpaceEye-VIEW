@@ -1,9 +1,0 @@
-#version 430 core
-
-out vec4 FragColor;
-
-void main()
-{
-    // 위성을 그릴 색상 (예: 밝은 청록색)
-    FragColor = vec4(0.0, 1.0, 0.8, 1.0);
-}

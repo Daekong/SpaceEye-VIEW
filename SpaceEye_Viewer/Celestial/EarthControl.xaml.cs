@@ -84,8 +84,7 @@ namespace SpaceEye_Viewer.Celestial
             GlControl.MouseWheel += OnMouseWheel;
             
             // 화면 로드가 완료된 시점에 렌더링을 시작하도록 이벤트 등록
-            this.Loaded += EarthControl_Loaded;
-          
+            this.Loaded += EarthControl_Loaded;          
         }
 
         #endregion
@@ -178,10 +177,7 @@ namespace SpaceEye_Viewer.Celestial
         /// 각 뷰포트(컨트롤)의 초기 카메라 위치를 설정합니다.
         /// </summary>
         private void SetupInitialCameras()
-        {
-            double earthRadius = Earth.EarthRadius;
-
-            // 왼쪽 창: 멀리서 지구 전체 보기 (고도 20,000km)
+        {     
             var cam = Renderer.ViewCamera;
             cam.Target = OpenTK.Vector3d.Zero;
             cam.Position = new OpenTK.Vector3d(0, 0, Earth.EarthCameraMaxDistance);

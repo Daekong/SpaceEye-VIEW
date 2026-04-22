@@ -56,7 +56,7 @@ namespace SpaceEye.Scene.Celestial
         /// 렌더링할 총 인덱스의 개수입니다. 
         /// 정육면체의 6개 면이 각각 사각형(4개의 정점)을 이루어 총 24개(6 * 4)가 됩니다.
         /// </summary>
-        private int _indexCount = 24;
+        private readonly int _indexCount = 24;
 
         /// <summary>현재 지구의 자전 각도 (Degrees)입니다.</summary>
         private double _rotationAngleDeg = 0;

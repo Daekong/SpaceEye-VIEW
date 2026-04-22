@@ -78,8 +78,6 @@
     <Compile Include="Celestial\EarthNodeTES.cs" />
     <Compile Include="Common\SkyboxNode.cs" />
     <Compile Include="Interfaces\ISceneNode.cs" />
-    <Compile Include="OrbitManager.cs" />
-    <Compile Include="Orbit\OrbitSystemNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
